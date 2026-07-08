@@ -1,0 +1,235 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  nutritionist
+  patient
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+model User {
+  id            String            @id @default(uuid())
+  email         String            @unique
+  passwordHash  String
+  role          Role
+  name          String
+  nutritionistId String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  patientProfile Patient?
+  sessions      RefreshSession[]
+  progressLogs  ProgressLog[]
+  medications   Medication[]
+  hydrationLogs HydrationLog[]
+  moodLogs      MoodLog[]
+  mealLogs      MealLog[]
+  voiceNotes    VoiceNote[]
+}
+
+model Patient {
+  id                 String      @id @default(uuid())
+  userId             String      @unique
+  nutritionistUserId String?
+  status             String      @default("pending")
+  phone              String?
+  birthDate          DateTime?
+  gender             Gender?
+  deletedAt          DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinicalRecords    ClinicalRecord[]
+  dietAssignments    PatientPlanAssignment[]
+}
+
+model RefreshSession {
+  id          String   @id @default(uuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  replacedBy  String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ClinicalRecord {
+  id                 String   @id @default(uuid())
+  patientId          String
+  date               DateTime @default(now())
+  data               Json
+  bmi                Float?
+  bodyFatPercentage  Float?
+  riskLevel          String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  patient            Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model DietPlan {
+  id                String                  @id @default(uuid())
+  nutritionistUserId String
+  name              String
+  notes             String?
+  isActive          Boolean                 @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  days              DietDay[]
+  assignments       PatientPlanAssignment[]
+}
+
+model DietDay {
+  id         String   @id @default(uuid())
+  planId     String
+  dayNumber  Int
+  createdAt  DateTime @default(now())
+
+  plan       DietPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  meals      Meal[]
+
+  @@unique([planId, dayNumber])
+}
+
+model Meal {
+  id         String         @id @default(uuid())
+  dayId      String
+  name       String
+  note       String?
+  createdAt  DateTime       @default(now())
+
+  day        DietDay        @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  items      MealFoodItem[]
+}
+
+model MealFoodItem {
+  id               String    @id @default(uuid())
+  mealId           String
+  name             String
+  portion          String?
+  calories         Float?
+  protein          Float?
+  carbs            Float?
+  fat              Float?
+  edamamRecipeUrl  String?
+  imageUrl         String?
+  healthLabels     String[]
+  dietLabels       String[]
+
+  meal             Meal      @relation(fields: [mealId], references: [id], onDelete: Cascade)
+}
+
+model PatientPlanAssignment {
+  id                String    @id @default(uuid())
+  patientId         String
+  planId            String
+  nutritionistUserId String
+  active            Boolean   @default(true)
+  assignedAt        DateTime  @default(now())
+  endedAt           DateTime?
+
+  patient           Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  plan              DietPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+model MealLog {
+  id           String   @id @default(uuid())
+  patientUserId String
+  planId       String?
+  mealName     String
+  date         DateTime
+  consumed     Boolean  @default(false)
+  consumedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patientUser  User     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+  voiceNotes   VoiceNote[]
+}
+
+model VoiceNote {
+  id           String   @id @default(uuid())
+  patientUserId String
+  mealLogId    String
+  storageKey   String
+  publicUrl    String
+  durationSec  Int?
+  createdAt    DateTime @default(now())
+
+  patientUser  User     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+  mealLog      MealLog  @relation(fields: [mealLogId], references: [id], onDelete: Cascade)
+}
+
+model HydrationLog {
+  id            String   @id @default(uuid())
+  patientUserId String
+  amountMl      Int
+  loggedAt      DateTime @default(now())
+
+  patientUser   User     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+}
+
+model MoodLog {
+  id            String   @id @default(uuid())
+  patientUserId String
+  mood          String
+  note          String?
+  loggedAt      DateTime @default(now())
+
+  patientUser   User     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+}
+
+model Medication {
+  id              String   @id @default(uuid())
+  patientUserId   String
+  name            String
+  dosage          String
+  reminderEnabled Boolean  @default(false)
+  times           String[]
+  days            String[]
+  intervalHours   Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patientUser     User     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+  takes           MedicationTake[]
+}
+
+model MedicationTake {
+  id            String   @id @default(uuid())
+  medicationId  String
+  takenAt       DateTime @default(now())
+
+  medication    Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+}
+
+model ProgressLog {
+  id            String   @id @default(uuid())
+  patientUserId String
+  weightKg      Float?
+  bmi           Float?
+  createdAt     DateTime @default(now())
+
+  patientUser   User     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+}
