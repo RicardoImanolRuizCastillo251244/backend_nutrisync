@@ -6,8 +6,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
 const app_1 = __importDefault(require("./app"));
 const env_1 = require("./shared/config/env");
-// Auto-sync database schema + run seed in development
-if (env_1.env.NODE_ENV === "development") {
+// Auto-sync database schema
+if (env_1.env.NODE_ENV === "production") {
+    // Producción: aplicar migraciones existentes
+    try {
+        console.log("Running database migrations...");
+        (0, child_process_1.execSync)("npx prisma migrate deploy", {
+            stdio: "inherit",
+            cwd: process.cwd(),
+        });
+        console.log("Migrations completed.");
+    }
+    catch (err) {
+        console.error("Migration error:", err.message);
+        process.exit(1);
+    }
+}
+else {
+    // Desarrollo: sincronizar schema directamente + seed
     try {
         console.log("Syncing database schema...");
         (0, child_process_1.execSync)("npx prisma db push", {

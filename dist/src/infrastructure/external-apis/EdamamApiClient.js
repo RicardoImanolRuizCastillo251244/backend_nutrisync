@@ -8,8 +8,8 @@ class EdamamApiClient {
         const maxCalories = Math.max(minCalories + 10, Math.ceil(params.targetCalories + params.tolerance));
         const query = new URLSearchParams({
             type: "public",
-            app_id: env_1.env.EDAMAM_APP_ID,
-            app_key: env_1.env.EDAMAM_APP_KEY,
+            app_id: env_1.env.EDAMAM_RECIPE_APP_ID,
+            app_key: env_1.env.EDAMAM_RECIPE_APP_KEY,
             mealType: params.mealType,
             calories: `${minCalories}-${maxCalories}`,
             random: "true",
@@ -48,8 +48,8 @@ class EdamamApiClient {
     }
     async searchFood(query) {
         const qs = new URLSearchParams({
-            app_id: env_1.env.EDAMAM_APP_ID,
-            app_key: env_1.env.EDAMAM_APP_KEY,
+            app_id: env_1.env.EDAMAM_FOOD_APP_ID,
+            app_key: env_1.env.EDAMAM_FOOD_APP_KEY,
             ingr: query,
             "nutrition-type": "logging",
         });

@@ -2,8 +2,22 @@ import { execSync } from "child_process";
 import app from "./app";
 import { env } from "./shared/config/env";
 
-// Auto-sync database schema + run seed in development
-if (env.NODE_ENV === "development") {
+// Auto-sync database schema
+if (env.NODE_ENV === "production") {
+  // Producción: aplicar migraciones existentes
+  try {
+    console.log("Running database migrations...");
+    execSync("npx prisma migrate deploy", {
+      stdio: "inherit",
+      cwd: process.cwd(),
+    });
+    console.log("Migrations completed.");
+  } catch (err) {
+    console.error("Migration error:", (err as Error).message);
+    process.exit(1);
+  }
+} else {
+  // Desarrollo: sincronizar schema directamente + seed
   try {
     console.log("Syncing database schema...");
     execSync("npx prisma db push", {
