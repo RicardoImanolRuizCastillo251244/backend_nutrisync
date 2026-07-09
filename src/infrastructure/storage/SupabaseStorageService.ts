@@ -6,7 +6,12 @@ export class SupabaseStorageService implements StorageRepository {
   private readonly client: ReturnType<typeof createClient>;
 
   constructor() {
-    this.client = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+    this.client = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
   }
 
   async upload(input: UploadInput): Promise<{ key: string; url: string }> {
