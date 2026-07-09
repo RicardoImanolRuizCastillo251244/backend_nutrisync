@@ -12,8 +12,15 @@ if (env.NODE_ENV === "production") {
       cwd: process.cwd(),
     });
     console.log("Migrations completed.");
+
+    console.log("Running seed...");
+    execSync("npx prisma db seed", {
+      stdio: "inherit",
+      cwd: process.cwd(),
+    });
+    console.log("Seed completed.");
   } catch (err) {
-    console.error("Migration error:", (err as Error).message);
+    console.error("Database bootstrap error:", (err as Error).message);
     process.exit(1);
   }
 } else {
