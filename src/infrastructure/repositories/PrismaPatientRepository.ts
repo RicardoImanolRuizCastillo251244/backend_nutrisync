@@ -4,6 +4,8 @@ import type {
 } from "../../core/repositories/PatientRepository";
 import { prisma } from "../database/prisma";
 import { SupabaseStorageService } from "../storage/SupabaseStorageService";
+import { Prisma } from "../../generated/prisma/client";
+import { DuplicateEmailError } from "../../shared/errors/DuplicateEmailError";
 
 const storage = new SupabaseStorageService();
 
@@ -26,19 +28,29 @@ export class PrismaPatientRepository implements PatientRepository {
       },
     };
 
-    const created = await prisma.patient.create({
-      data,
-      include: { user: true },
-    });
+    try {
+      const created = await prisma.patient.create({
+        data,
+        include: { user: true },
+      });
 
-    return {
-      ...created,
-      user: {
-        id: created.user.id,
-        email: created.user.email,
-        name: created.user.name,
-      },
-    };
+      return {
+        ...created,
+        user: {
+          id: created.user.id,
+          email: created.user.email,
+          name: created.user.name,
+        },
+      };
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new DuplicateEmailError(input.email);
+      }
+      throw error;
+    }
   }
 
   async listByNutritionist(nutritionistUserId: string) {
