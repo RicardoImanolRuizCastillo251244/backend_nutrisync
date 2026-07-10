@@ -2,6 +2,30 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EdamamApiClient = void 0;
 const env_1 = require("../../shared/config/env");
+// ── Mapper ───────────────────────────────────────────────────────
+function mapMealPlanDay(day) {
+    const meals = [];
+    for (const [sectionName, sectionData] of Object.entries(day.sections ?? {})) {
+        const recipe = sectionData._recipe;
+        if (!recipe)
+            continue;
+        const nutrients = recipe.totalNutrients ?? {};
+        const item = {
+            name: recipe.label,
+            calories: Math.round(recipe.calories),
+            protein: Number((nutrients.PROCNT?.quantity ?? 0).toFixed(2)),
+            carbs: Number((nutrients.CHOCDF?.quantity ?? 0).toFixed(2)),
+            fat: Number((nutrients.FAT?.quantity ?? 0).toFixed(2)),
+            healthLabels: recipe.healthLabels ?? [],
+            dietLabels: recipe.dietLabels ?? [],
+            portion: "1 serving",
+            ...(recipe.image ? { imageUrl: recipe.image } : {}),
+            ...(recipe.url ? { sourceUrl: recipe.url } : {}),
+        };
+        meals.push({ name: sectionName, items: [item] });
+    }
+    return meals;
+}
 class EdamamApiClient {
     buildRecipeUrl(params) {
         const minCalories = Math.max(50, Math.floor(params.targetCalories - params.tolerance));
@@ -45,6 +69,53 @@ class EdamamApiClient {
         }
         const payload = (await response.json());
         return (payload.hits ?? []).map((hit) => this.mapHit(hit));
+    }
+    async searchMealPlan(caloriesTarget, days = 1) {
+        const minCal = Math.max(50, caloriesTarget - 50);
+        const maxCal = caloriesTarget + 50;
+        const body = {
+            size: days,
+            plan: {
+                accept: {
+                    all: [
+                        {
+                            energy: {
+                                fit: {
+                                    min: minCal,
+                                    max: maxCal,
+                                },
+                            },
+                        },
+                    ],
+                },
+            },
+        };
+        const qs = new URLSearchParams({
+            type: "public",
+            beta: "true",
+            options: "defaults",
+        });
+        const url = `${env_1.env.EDAMAM_BASE_URL}/api/meal-planner/v1/${env_1.env.EDAMAM_RECIPE_APP_ID}/select?${qs.toString()}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Edamam-Account-User": env_1.env.EDAMAM_MEAL_PLANNER_ACCOUNT_USER,
+            },
+            body: JSON.stringify(body),
+        });
+        if (response.status === 429) {
+            throw new Error("Edamam rate limit reached");
+        }
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`Edamam meal planner failed (${response.status}): ${text}`);
+        }
+        const payload = (await response.json());
+        if (!payload.selection || payload.selection.length === 0) {
+            return [];
+        }
+        return payload.selection.map((day) => mapMealPlanDay(day));
     }
     async searchFood(query) {
         const qs = new URLSearchParams({

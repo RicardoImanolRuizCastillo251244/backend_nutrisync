@@ -13,13 +13,13 @@ class GenerateSuggestedDietPlanUseCase {
     }
     async execute(input) {
         const randomSeed = Math.floor(Math.random() * 10000);
-        const meals = await Promise.all(DISTRIBUTION.map(async (slot, idx) => {
+        const meals = await Promise.all(DISTRIBUTION.map(async (slot, index) => {
             const slotCalories = Math.round(input.caloriesTarget * slot.pct);
             const recipes = await this.edamamRepository.searchRecipes({
                 mealType: slot.edamamMealType,
                 targetCalories: slotCalories,
                 tolerance: 120,
-                randomSeed: randomSeed + idx,
+                randomSeed: randomSeed + index,
             });
             const selected = recipes[0];
             if (!selected) {

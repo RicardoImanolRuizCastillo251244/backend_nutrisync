@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaPatientRepository = void 0;
 const prisma_1 = require("../database/prisma");
 const SupabaseStorageService_1 = require("../storage/SupabaseStorageService");
+const client_1 = require("../../generated/prisma/client");
+const DuplicateEmailError_1 = require("../../shared/errors/DuplicateEmailError");
 const storage = new SupabaseStorageService_1.SupabaseStorageService();
 class PrismaPatientRepository {
     async create(input) {
@@ -22,18 +24,27 @@ class PrismaPatientRepository {
                 },
             },
         };
-        const created = await prisma_1.prisma.patient.create({
-            data,
-            include: { user: true },
-        });
-        return {
-            ...created,
-            user: {
-                id: created.user.id,
-                email: created.user.email,
-                name: created.user.name,
-            },
-        };
+        try {
+            const created = await prisma_1.prisma.patient.create({
+                data,
+                include: { user: true },
+            });
+            return {
+                ...created,
+                user: {
+                    id: created.user.id,
+                    email: created.user.email,
+                    name: created.user.name,
+                },
+            };
+        }
+        catch (error) {
+            if (error instanceof client_1.Prisma.PrismaClientKnownRequestError &&
+                error.code === "P2002") {
+                throw new DuplicateEmailError_1.DuplicateEmailError(input.email);
+            }
+            throw error;
+        }
     }
     async listByNutritionist(nutritionistUserId) {
         const rows = await prisma_1.prisma.patient.findMany({
