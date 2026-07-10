@@ -57,6 +57,11 @@ interface MealPlanResponse {
   status?: string;
 }
 
+interface CachedRecipesEntry {
+  expiresAt: number;
+  items: SuggestedMealItem[];
+}
+
 // ── Mapper ───────────────────────────────────────────────────────
 
 function mapMealPlanDay(day: MealPlanDay) {
@@ -87,6 +92,17 @@ function mapMealPlanDay(day: MealPlanDay) {
 }
 
 export class EdamamApiClient implements EdamamRepository {
+  private static readonly RECIPE_CACHE_TTL_MS = 5 * 60 * 1000;
+  private static readonly recipeCache = new Map<string, CachedRecipesEntry>();
+
+  private buildRecipeCacheKey(params: {
+    mealType: string;
+    targetCalories: number;
+    tolerance: number;
+  }) {
+    return [params.mealType, params.targetCalories, params.tolerance].join(":");
+  }
+
   private buildRecipeUrl(params: { mealType: string; targetCalories: number; tolerance: number; randomSeed?: number }) {
     const minCalories = Math.max(50, Math.floor(params.targetCalories - params.tolerance));
     const maxCalories = Math.max(minCalories + 10, Math.ceil(params.targetCalories + params.tolerance));
@@ -123,6 +139,13 @@ export class EdamamApiClient implements EdamamRepository {
   }
 
   async searchRecipes(params: { mealType: string; targetCalories: number; tolerance: number; randomSeed?: number; }): Promise<SuggestedMealItem[]> {
+    const cacheKey = this.buildRecipeCacheKey(params);
+    const cached = EdamamApiClient.recipeCache.get(cacheKey);
+
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.items.map((item) => ({ ...item }));
+    }
+
     const response = await fetch(this.buildRecipeUrl(params), { method: "GET" });
 
     if (response.status === 429) {
@@ -135,7 +158,14 @@ export class EdamamApiClient implements EdamamRepository {
     }
 
     const payload = (await response.json()) as { hits?: EdamamHit[] };
-    return (payload.hits ?? []).map((hit) => this.mapHit(hit));
+    const items = (payload.hits ?? []).map((hit) => this.mapHit(hit));
+
+    EdamamApiClient.recipeCache.set(cacheKey, {
+      expiresAt: Date.now() + EdamamApiClient.RECIPE_CACHE_TTL_MS,
+      items,
+    });
+
+    return items.map((item) => ({ ...item }));
   }
 
   async searchMealPlan(caloriesTarget: number, days: number = 1) {

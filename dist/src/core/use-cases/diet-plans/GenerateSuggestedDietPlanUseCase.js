@@ -12,23 +12,23 @@ class GenerateSuggestedDietPlanUseCase {
         this.edamamRepository = edamamRepository;
     }
     async execute(input) {
-        const randomSeed = Math.floor(Math.random() * 10000);
-        const meals = await Promise.all(DISTRIBUTION.map(async (slot, index) => {
+        const meals = [];
+        for (const slot of DISTRIBUTION) {
             const slotCalories = Math.round(input.caloriesTarget * slot.pct);
             const recipes = await this.edamamRepository.searchRecipes({
                 mealType: slot.edamamMealType,
                 targetCalories: slotCalories,
                 tolerance: 120,
-                randomSeed: randomSeed + index,
             });
             const selected = recipes[0];
             if (!selected) {
-                return {
+                meals.push({
                     name: slot.meal,
                     items: [],
-                };
+                });
+                continue;
             }
-            return {
+            meals.push({
                 name: slot.meal,
                 items: [
                     {
@@ -44,8 +44,8 @@ class GenerateSuggestedDietPlanUseCase {
                         dietLabels: selected.dietLabels,
                     },
                 ],
-            };
-        }));
+            });
+        }
         return {
             caloriesTarget: input.caloriesTarget,
             generatedAt: new Date().toISOString(),

@@ -15,44 +15,43 @@ export class GenerateSuggestedDietPlanUseCase {
   constructor(private readonly edamamRepository: EdamamRepository) {}
 
   async execute(input: Input) {
-    const randomSeed = Math.floor(Math.random() * 10000);
-    const meals = await Promise.all(
-      DISTRIBUTION.map(async (slot, index) => {
-        const slotCalories = Math.round(input.caloriesTarget * slot.pct);
-        const recipes = await this.edamamRepository.searchRecipes({
-          mealType: slot.edamamMealType,
-          targetCalories: slotCalories,
-          tolerance: 120,
-          randomSeed: randomSeed + index,
-        });
+    const meals: Array<{ name: string; items: Array<Record<string, unknown>> }> = [];
 
-        const selected = recipes[0];
-        if (!selected) {
-          return {
-            name: slot.meal,
-            items: [],
-          };
-        }
+    for (const slot of DISTRIBUTION) {
+      const slotCalories = Math.round(input.caloriesTarget * slot.pct);
+      const recipes = await this.edamamRepository.searchRecipes({
+        mealType: slot.edamamMealType,
+        targetCalories: slotCalories,
+        tolerance: 120,
+      });
 
-        return {
+      const selected = recipes[0];
+      if (!selected) {
+        meals.push({
           name: slot.meal,
-          items: [
-            {
-              name: selected.name,
-              portion: selected.portion,
-              calories: selected.calories,
-              protein: selected.protein,
-              carbs: selected.carbs,
-              fat: selected.fat,
-              imageUrl: selected.imageUrl,
-              sourceUrl: selected.sourceUrl,
-              healthLabels: selected.healthLabels,
-              dietLabels: selected.dietLabels,
-            },
-          ],
-        };
-      })
-    );
+          items: [],
+        });
+        continue;
+      }
+
+      meals.push({
+        name: slot.meal,
+        items: [
+          {
+            name: selected.name,
+            portion: selected.portion,
+            calories: selected.calories,
+            protein: selected.protein,
+            carbs: selected.carbs,
+            fat: selected.fat,
+            imageUrl: selected.imageUrl,
+            sourceUrl: selected.sourceUrl,
+            healthLabels: selected.healthLabels,
+            dietLabels: selected.dietLabels,
+          },
+        ],
+      });
+    }
 
     return {
       caloriesTarget: input.caloriesTarget,

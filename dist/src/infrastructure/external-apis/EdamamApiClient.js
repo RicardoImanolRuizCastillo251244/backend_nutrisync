@@ -27,6 +27,9 @@ function mapMealPlanDay(day) {
     return meals;
 }
 class EdamamApiClient {
+    buildRecipeCacheKey(params) {
+        return [params.mealType, params.targetCalories, params.tolerance].join(":");
+    }
     buildRecipeUrl(params) {
         const minCalories = Math.max(50, Math.floor(params.targetCalories - params.tolerance));
         const maxCalories = Math.max(minCalories + 10, Math.ceil(params.targetCalories + params.tolerance));
@@ -59,6 +62,11 @@ class EdamamApiClient {
         };
     }
     async searchRecipes(params) {
+        const cacheKey = this.buildRecipeCacheKey(params);
+        const cached = EdamamApiClient.recipeCache.get(cacheKey);
+        if (cached && cached.expiresAt > Date.now()) {
+            return cached.items.map((item) => ({ ...item }));
+        }
         const response = await fetch(this.buildRecipeUrl(params), { method: "GET" });
         if (response.status === 429) {
             throw new Error("Edamam rate limit reached");
@@ -68,7 +76,12 @@ class EdamamApiClient {
             throw new Error(`Edamam request failed (${response.status}): ${text}`);
         }
         const payload = (await response.json());
-        return (payload.hits ?? []).map((hit) => this.mapHit(hit));
+        const items = (payload.hits ?? []).map((hit) => this.mapHit(hit));
+        EdamamApiClient.recipeCache.set(cacheKey, {
+            expiresAt: Date.now() + EdamamApiClient.RECIPE_CACHE_TTL_MS,
+            items,
+        });
+        return items.map((item) => ({ ...item }));
     }
     async searchMealPlan(caloriesTarget, days = 1) {
         const minCal = Math.max(50, caloriesTarget - 50);
@@ -143,4 +156,6 @@ class EdamamApiClient {
     }
 }
 exports.EdamamApiClient = EdamamApiClient;
+EdamamApiClient.RECIPE_CACHE_TTL_MS = 5 * 60 * 1000;
+EdamamApiClient.recipeCache = new Map();
 //# sourceMappingURL=EdamamApiClient.js.map
