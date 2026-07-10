@@ -29,5 +29,5 @@ export interface PatientRepository {
     nutritionistUserId: string,
     updates: Partial<Pick<CreatePatientInput, "name" | "phone" | "birthDate" | "gender">>
   ): Promise<PatientWithUser | null>;
-  softDelete(id: string, nutritionistUserId: string): Promise<void>;
+  hardDelete(id: string, nutritionistUserId: string): Promise<boolean>;
 }

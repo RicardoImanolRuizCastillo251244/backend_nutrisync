@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaPatientRepository = void 0;
 const prisma_1 = require("../database/prisma");
+const SupabaseStorageService_1 = require("../storage/SupabaseStorageService");
+const storage = new SupabaseStorageService_1.SupabaseStorageService();
 class PrismaPatientRepository {
     async create(input) {
         const data = {
@@ -142,11 +144,29 @@ class PrismaPatientRepository {
             },
         };
     }
-    async softDelete(id, nutritionistUserId) {
-        await prisma_1.prisma.patient.updateMany({
-            where: { id, nutritionistUserId, deletedAt: null },
-            data: { deletedAt: new Date() },
+    async hardDelete(id, nutritionistUserId) {
+        const row = await prisma_1.prisma.patient.findFirst({
+            where: {
+                id,
+                deletedAt: null,
+                OR: [{ nutritionistUserId }, { status: "pending" }],
+            },
+            select: { id: true, userId: true },
         });
+        if (!row)
+            return false;
+        const notes = await prisma_1.prisma.voiceNote.findMany({
+            where: { patientUserId: row.userId },
+            select: { storageKey: true },
+        });
+        const keys = notes
+            .map((note) => note.storageKey)
+            .filter((key) => Boolean(key));
+        await storage.deleteObjects(keys);
+        await prisma_1.prisma.$transaction(async (tx) => {
+            await tx.user.delete({ where: { id: row.userId } });
+        });
+        return true;
     }
 }
 exports.PrismaPatientRepository = PrismaPatientRepository;

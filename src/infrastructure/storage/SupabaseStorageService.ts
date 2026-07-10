@@ -48,4 +48,18 @@ export class SupabaseStorageService implements StorageRepository {
 
     return data.signedUrl;
   }
+
+  async deleteObjects(keys: string[]): Promise<void> {
+    if (keys.length === 0) return;
+
+    const bucket = env.SUPABASE_STORAGE_BUCKET;
+
+    const { error } = await this.client.storage
+      .from(bucket)
+      .remove(keys);
+
+    if (error) {
+      throw new Error(`Supabase delete failed: ${error.message}`);
+    }
+  }
 }

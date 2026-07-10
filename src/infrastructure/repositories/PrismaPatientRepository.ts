@@ -3,6 +3,9 @@ import type {
   PatientRepository,
 } from "../../core/repositories/PatientRepository";
 import { prisma } from "../database/prisma";
+import { SupabaseStorageService } from "../storage/SupabaseStorageService";
+
+const storage = new SupabaseStorageService();
 
 export class PrismaPatientRepository implements PatientRepository {
   async create(input: CreatePatientInput) {
@@ -160,10 +163,33 @@ export class PrismaPatientRepository implements PatientRepository {
     };
   }
 
-  async softDelete(id: string, nutritionistUserId: string) {
-    await prisma.patient.updateMany({
-      where: { id, nutritionistUserId, deletedAt: null },
-      data: { deletedAt: new Date() },
+  async hardDelete(id: string, nutritionistUserId: string): Promise<boolean> {
+    const row = await prisma.patient.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        OR: [{ nutritionistUserId }, { status: "pending" }],
+      },
+      select: { id: true, userId: true },
     });
+
+    if (!row) return false;
+
+    const notes = await prisma.voiceNote.findMany({
+      where: { patientUserId: row.userId },
+      select: { storageKey: true },
+    });
+
+    const keys = notes
+      .map((note) => note.storageKey)
+      .filter((key): key is string => Boolean(key));
+
+    await storage.deleteObjects(keys);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.delete({ where: { id: row.userId } });
+    });
+
+    return true;
   }
 }

@@ -38,6 +38,17 @@ class SupabaseStorageService {
         }
         return data.signedUrl;
     }
+    async deleteObjects(keys) {
+        if (keys.length === 0)
+            return;
+        const bucket = env_1.env.SUPABASE_STORAGE_BUCKET;
+        const { error } = await this.client.storage
+            .from(bucket)
+            .remove(keys);
+        if (error) {
+            throw new Error(`Supabase delete failed: ${error.message}`);
+        }
+    }
 }
 exports.SupabaseStorageService = SupabaseStorageService;
 //# sourceMappingURL=SupabaseStorageService.js.map

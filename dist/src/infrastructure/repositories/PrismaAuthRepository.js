@@ -19,6 +19,7 @@ class PrismaAuthRepository {
             createdAt: user.createdAt,
             passwordHash: user.passwordHash,
             patientProfileId: user.patientProfile?.id,
+            patientNutritionistId: user.patientProfile?.nutritionistUserId ?? null,
         };
     }
     async findUserById(id) {

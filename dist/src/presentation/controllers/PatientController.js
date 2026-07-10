@@ -45,8 +45,11 @@ class PatientController {
     }
     static async remove(req, res) {
         const id = String(req.params.id ?? "");
-        await patientRepository.softDelete(id, req.user.userId);
-        return (0, response_1.ok)(res, { message: "Patient soft deleted" });
+        const deleted = await patientRepository.hardDelete(id, req.user.userId);
+        if (!deleted) {
+            return (0, response_1.fail)(res, "Patient not found", 404);
+        }
+        return (0, response_1.ok)(res, { message: "Patient permanently deleted" });
     }
 }
 exports.PatientController = PatientController;

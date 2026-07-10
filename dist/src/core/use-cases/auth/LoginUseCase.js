@@ -16,6 +16,10 @@ class LoginUseCase {
         const isValid = await (0, hash_1.comparePassword)(password, user.passwordHash);
         if (!isValid)
             throw new Error("Invalid credentials");
+        // Si es paciente, verificar que haya sido aprobado por un nutriólogo
+        if (user.role === "patient" && !user.patientNutritionistId) {
+            throw new Error("Tu cuenta aún no ha sido aprobada por un nutriólogo. Espera a que te den de alta.");
+        }
         const sessionId = crypto.randomUUID();
         const refreshToken = (0, jwt_1.signRefreshToken)({ sub: user.id, sessionId });
         const refreshTokenHash = (0, crypto_1.sha256)(refreshToken);
