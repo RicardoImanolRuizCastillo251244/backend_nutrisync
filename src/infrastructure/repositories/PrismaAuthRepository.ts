@@ -19,6 +19,7 @@ export class PrismaAuthRepository implements AuthRepository {
       createdAt: user.createdAt,
       passwordHash: user.passwordHash,
       patientProfileId: user.patientProfile?.id,
+      patientNutritionistId: user.patientProfile?.nutritionistUserId ?? null,
     };
   }
 
