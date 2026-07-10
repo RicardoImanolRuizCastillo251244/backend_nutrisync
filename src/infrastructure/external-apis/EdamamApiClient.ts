@@ -13,6 +13,79 @@ interface EdamamHit {
   };
 }
 
+// ── Meal Planner API types ──────────────────────────────────────
+
+interface EnergyFit {
+  min: number;
+  max: number;
+}
+
+interface EnergyParam {
+  energy: {
+    fit: EnergyFit;
+  };
+}
+
+interface MealPlanBody {
+  size: number;
+  plan: {
+    accept: {
+      all: EnergyParam[];
+    };
+  };
+}
+
+interface MealPlanDay {
+  day: number;
+  sections: Record<string, {
+    assigned: string;
+    _recipe?: {
+      uri: string;
+      label: string;
+      image?: string;
+      calories: number;
+      totalNutrients?: Record<string, { quantity: number }>;
+      healthLabels?: string[];
+      dietLabels?: string[];
+      url?: string;
+    };
+  }>;
+}
+
+interface MealPlanResponse {
+  selection?: MealPlanDay[];
+  status?: string;
+}
+
+// ── Mapper ───────────────────────────────────────────────────────
+
+function mapMealPlanDay(day: MealPlanDay) {
+  const meals: Array<{ name: string; items: SuggestedMealItem[] }> = [];
+
+  for (const [sectionName, sectionData] of Object.entries(day.sections ?? {})) {
+    const recipe = sectionData._recipe;
+    if (!recipe) continue;
+
+    const nutrients = recipe.totalNutrients ?? {};
+    const item: SuggestedMealItem = {
+      name: recipe.label,
+      calories: Math.round(recipe.calories),
+      protein: Number((nutrients.PROCNT?.quantity ?? 0).toFixed(2)),
+      carbs: Number((nutrients.CHOCDF?.quantity ?? 0).toFixed(2)),
+      fat: Number((nutrients.FAT?.quantity ?? 0).toFixed(2)),
+      healthLabels: recipe.healthLabels ?? [],
+      dietLabels: recipe.dietLabels ?? [],
+      portion: "1 serving",
+      ...(recipe.image ? { imageUrl: recipe.image } : {}),
+      ...(recipe.url ? { sourceUrl: recipe.url } : {}),
+    };
+
+    meals.push({ name: sectionName, items: [item] });
+  }
+
+  return meals;
+}
+
 export class EdamamApiClient implements EdamamRepository {
   private buildRecipeUrl(params: { mealType: string; targetCalories: number; tolerance: number; randomSeed?: number }) {
     const minCalories = Math.max(50, Math.floor(params.targetCalories - params.tolerance));
@@ -63,6 +136,63 @@ export class EdamamApiClient implements EdamamRepository {
 
     const payload = (await response.json()) as { hits?: EdamamHit[] };
     return (payload.hits ?? []).map((hit) => this.mapHit(hit));
+  }
+
+  async searchMealPlan(caloriesTarget: number, days: number = 1) {
+    const minCal = Math.max(50, caloriesTarget - 50);
+    const maxCal = caloriesTarget + 50;
+
+    const body: MealPlanBody = {
+      size: days,
+      plan: {
+        accept: {
+          all: [
+            {
+              energy: {
+                fit: {
+                  min: minCal,
+                  max: maxCal,
+                },
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    const qs = new URLSearchParams({
+      type: "public",
+      beta: "true",
+      options: "defaults",
+    });
+
+    const url = `${env.EDAMAM_BASE_URL}/api/meal-planner/v1/${env.EDAMAM_RECIPE_APP_ID}/select?${qs.toString()}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Edamam-Account-User": env.EDAMAM_MEAL_PLANNER_ACCOUNT_USER,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (response.status === 429) {
+      throw new Error("Edamam rate limit reached");
+    }
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Edamam meal planner failed (${response.status}): ${text}`);
+    }
+
+    const payload = (await response.json()) as MealPlanResponse;
+
+    if (!payload.selection || payload.selection.length === 0) {
+      return [];
+    }
+
+    return payload.selection.map((day) => mapMealPlanDay(day));
   }
 
   async searchFood(query: string): Promise<SuggestedMealItem[]> {
