@@ -15,6 +15,7 @@ router.use(requireAuth, requireRole("nutritionist"));
 
 // Existing endpoints
 router.post("/generate-suggested", validateBody(generateDietPlanSchema), DietPlanController.generateSuggested);
+router.post("/calculate-item", DietPlanController.calculateItem);
 router.get("/foods/search", DietPlanController.searchFood);
 
 // CRUD endpoints
