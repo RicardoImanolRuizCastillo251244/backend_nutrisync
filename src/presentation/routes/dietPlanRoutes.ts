@@ -11,6 +11,9 @@ import { assignPlanSchema, unassignPlanSchema } from "../validators/assignmentVa
 
 const router = Router();
 
+// Patient endpoint — no requiere rol de nutriólogo
+router.get("/my-plan", requireAuth, DietPlanController.getMyPlan);
+
 router.use(requireAuth, requireRole("nutritionist"));
 
 // Existing endpoints

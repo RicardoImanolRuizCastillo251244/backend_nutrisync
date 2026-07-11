@@ -1,10 +1,14 @@
 import type { Request, Response } from "express";
 import { GenerateSuggestedDietPlanUseCase } from "../../core/use-cases/diet-plans/GenerateSuggestedDietPlanUseCase";
 import { EdamamApiClient } from "../../infrastructure/external-apis/EdamamApiClient";
+import { PrismaPatientPlanAssignmentRepository } from "../../infrastructure/repositories/PrismaPatientPlanAssignmentRepository";
+import { PrismaDietPlanRepository } from "../../infrastructure/repositories/PrismaDietPlanRepository";
 import { ok, fail } from "../../shared/utils/response";
 
 const edamamClient = new EdamamApiClient();
 const generateUseCase = new GenerateSuggestedDietPlanUseCase(edamamClient);
+const assignmentRepository = new PrismaPatientPlanAssignmentRepository();
+const dietPlanRepository = new PrismaDietPlanRepository();
 
 export class DietPlanController {
   static async generateSuggested(req: Request, res: Response) {
@@ -36,6 +40,32 @@ export class DietPlanController {
       carbs: Number((Number(carbs ?? 0) * factor).toFixed(1)),
       fat: Number((Number(fat ?? 0) * factor).toFixed(1)),
     });
+  }
+
+  static async getMyPlan(req: Request, res: Response) {
+    const patientId = req.user!.patientId;
+
+    if (!patientId) {
+      return fail(res, "No tienes un perfil de paciente asociado", 403);
+    }
+
+    try {
+      const assignment = await assignmentRepository.findActiveByPatient(patientId);
+      if (!assignment) {
+        return ok(res, null);
+      }
+
+      // Cargar el plan completo usando el nutritionistUserId de la asignación
+      const plan = await dietPlanRepository.getById(assignment.planId, assignment.nutritionistUserId);
+      if (!plan) {
+        return ok(res, null);
+      }
+
+      return ok(res, plan);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al obtener plan";
+      return fail(res, message, 502);
+    }
   }
 
   static async searchFood(req: Request, res: Response) {
