@@ -48,6 +48,26 @@ export class ClinicalRecordController {
     return ok(res, { message: "Clinical record deleted" });
   }
 
+  static async getMetrics(req: Request, res: Response) {
+    try {
+      const patientId = req.user!.patientId;
+      if (!patientId) {
+        return fail(res, "No tienes un perfil de paciente asociado", 403);
+      }
+
+      const records = await repository.listByPatient(patientId);
+      if (records.length === 0) {
+        return ok(res, null);
+      }
+
+      const latest = records.sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+      return ok(res, latest.data);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al obtener métricas";
+      return fail(res, message, 502);
+    }
+  }
+
   static async upsertMetrics(req: Request, res: Response) {
     try {
       const patientId = req.user!.patientId;
