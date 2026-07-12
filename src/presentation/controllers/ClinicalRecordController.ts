@@ -31,7 +31,8 @@ export class ClinicalRecordController {
 
   static async update(req: Request, res: Response) {
     const id = String(req.params.id ?? "");
-    const patientId = String(req.params.patientId ?? "");
+    const body = req.body as Record<string, unknown>;
+    const patientId = String(body.patientId ?? req.params.patientId ?? "");
     const updated = await updateUseCase.execute({
       id,
       patientId,
@@ -43,7 +44,8 @@ export class ClinicalRecordController {
 
   static async remove(req: Request, res: Response) {
     const id = String(req.params.id ?? "");
-    const patientId = String(req.params.patientId ?? "");
+    const body = req.body as Record<string, unknown>;
+    const patientId = String(body.patientId ?? req.params.patientId ?? "");
     await repository.softDelete(id, patientId);
     return ok(res, { message: "Clinical record deleted" });
   }
