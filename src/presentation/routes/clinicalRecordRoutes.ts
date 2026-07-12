@@ -10,6 +10,9 @@ import {
 
 const router = Router();
 
+// Patient endpoint — guardar métricas corporales
+router.post("/metrics", requireAuth, ClinicalRecordController.upsertMetrics);
+
 router.use(requireAuth, requireRole("nutritionist"));
 
 /**
