@@ -55,30 +55,39 @@ export class ClinicalRecordController {
         return fail(res, "No tienes un perfil de paciente asociado", 403);
       }
 
-      const { weightKg, heightCm, age, gender } = req.body;
-      if (!weightKg || !heightCm || !age || !gender) {
-        return fail(res, "Faltan datos: weightKg, heightCm, age, gender", 400);
+      const { weightKg, heightCm, dateOfBirth, gender } = req.body;
+      if (!weightKg || !heightCm || !dateOfBirth || !gender) {
+        return fail(res, "Faltan datos: weightKg, heightCm, dateOfBirth, gender", 400);
+      }
+
+      const birthDate = new Date(dateOfBirth as string);
+      const now = new Date();
+      let age = now.getFullYear() - birthDate.getFullYear();
+      const m = now.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) {
+        age--;
       }
 
       const calculator = new CalculateClinicalMetrics();
       const metrics = calculator.execute({
         weightKg: Number(weightKg),
         heightCm: Number(heightCm),
-        age: Number(age),
+        age,
         gender: gender as "male" | "female",
       });
 
       const existingRecords = await repository.listByPatient(patientId);
-      const today = new Date().toISOString().slice(0, 10);
+      const todayStr = now.toISOString().slice(0, 10);
       const todayRecord = existingRecords.find(
-        (r) => r.date.toISOString().slice(0, 10) === today
+        (r) => r.date.toISOString().slice(0, 10) === todayStr
       );
 
       const dataPayload = {
         weightKg: Number(weightKg),
         heightCm: Number(heightCm),
-        age: Number(age),
+        age,
         gender: gender as string,
+        dateOfBirth: dateOfBirth as string,
         ...metrics,
       };
 
