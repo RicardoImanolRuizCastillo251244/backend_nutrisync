@@ -16,7 +16,7 @@ const mealItemSchema = z.object({
 const mealSchema = z.object({
   name: z.string().min(1),
   note: z.string().optional(),
-  items: z.array(mealItemSchema).min(1),
+  items: z.array(mealItemSchema),
 });
 
 const daySchema = z.object({
