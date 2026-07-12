@@ -8,6 +8,7 @@ exports.createClinicalRecordSchema = zod_1.z.object({
     data: zod_1.z.record(zod_1.z.string(), zod_1.z.unknown()),
 });
 exports.updateClinicalRecordSchema = zod_1.z.object({
+    patientId: zod_1.z.string().uuid().optional(),
     date: zod_1.z.string().optional(),
     data: zod_1.z.record(zod_1.z.string(), zod_1.z.unknown()).optional(),
 });

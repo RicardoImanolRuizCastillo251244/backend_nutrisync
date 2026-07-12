@@ -7,6 +7,7 @@ export const createClinicalRecordSchema = z.object({
 });
 
 export const updateClinicalRecordSchema = z.object({
+  patientId: z.string().uuid().optional(),
   date: z.string().optional(),
   data: z.record(z.string(), z.unknown()).optional(),
 });

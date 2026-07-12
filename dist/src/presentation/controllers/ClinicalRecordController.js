@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClinicalRecordController = void 0;
 const CreateClinicalRecordUseCase_1 = require("../../core/use-cases/clinical-records/CreateClinicalRecordUseCase");
 const UpdateClinicalRecordUseCase_1 = require("../../core/use-cases/clinical-records/UpdateClinicalRecordUseCase");
+const CalculateClinicalMetrics_1 = require("../../core/use-cases/clinical-records/CalculateClinicalMetrics");
 const PrismaClinicalRecordRepository_1 = require("../../infrastructure/repositories/PrismaClinicalRecordRepository");
 const response_1 = require("../../shared/utils/response");
 const repository = new PrismaClinicalRecordRepository_1.PrismaClinicalRecordRepository();
@@ -28,7 +29,8 @@ class ClinicalRecordController {
     }
     static async update(req, res) {
         const id = String(req.params.id ?? "");
-        const patientId = String(req.params.patientId ?? "");
+        const body = req.body;
+        const patientId = String(body.patientId ?? req.params.patientId ?? "");
         const updated = await updateUseCase.execute({
             id,
             patientId,
@@ -40,9 +42,90 @@ class ClinicalRecordController {
     }
     static async remove(req, res) {
         const id = String(req.params.id ?? "");
-        const patientId = String(req.params.patientId ?? "");
+        const body = req.body;
+        const patientId = String(body.patientId ?? req.params.patientId ?? "");
         await repository.softDelete(id, patientId);
         return (0, response_1.ok)(res, { message: "Clinical record deleted" });
+    }
+    static async getMetrics(req, res) {
+        try {
+            const patientId = req.user.patientId;
+            if (!patientId) {
+                return (0, response_1.fail)(res, "No tienes un perfil de paciente asociado", 403);
+            }
+            const records = await repository.listByPatient(patientId);
+            if (records.length === 0) {
+                return (0, response_1.ok)(res, null);
+            }
+            const latest = records.sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+            if (!latest)
+                return (0, response_1.ok)(res, null);
+            return (0, response_1.ok)(res, latest.data);
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : "Error al obtener métricas";
+            return (0, response_1.fail)(res, message, 502);
+        }
+    }
+    static async upsertMetrics(req, res) {
+        try {
+            const patientId = req.user.patientId;
+            if (!patientId) {
+                return (0, response_1.fail)(res, "No tienes un perfil de paciente asociado", 403);
+            }
+            const { weightKg, heightCm, dateOfBirth, gender, name } = req.body;
+            if (!weightKg || !heightCm || !dateOfBirth || !gender) {
+                return (0, response_1.fail)(res, "Faltan datos: weightKg, heightCm, dateOfBirth, gender", 400);
+            }
+            const birthDate = new Date(dateOfBirth);
+            const now = new Date();
+            let age = now.getFullYear() - birthDate.getFullYear();
+            const m = now.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            const calculator = new CalculateClinicalMetrics_1.CalculateClinicalMetrics();
+            const metrics = calculator.execute({
+                weightKg: Number(weightKg),
+                heightCm: Number(heightCm),
+                age,
+                gender: gender,
+            });
+            const existingRecords = await repository.listByPatient(patientId);
+            const todayStr = now.toISOString().slice(0, 10);
+            const todayRecord = existingRecords.find((r) => r.date.toISOString().slice(0, 10) === todayStr);
+            const dataPayload = {
+                name: String(name ?? ''),
+                weightKg: Number(weightKg),
+                heightCm: Number(heightCm),
+                age,
+                gender: gender,
+                dateOfBirth: dateOfBirth,
+                ...metrics,
+            };
+            if (todayRecord) {
+                const updated = await repository.update(todayRecord.id, patientId, {
+                    data: dataPayload,
+                    bmi: metrics.bmi,
+                    bodyFatPercentage: metrics.bodyFatPercentage,
+                    riskLevel: metrics.riskLevel,
+                });
+                return (0, response_1.ok)(res, updated);
+            }
+            const created = await repository.create({
+                patientId,
+                date: new Date(),
+                data: dataPayload,
+                bmi: metrics.bmi,
+                bodyFatPercentage: metrics.bodyFatPercentage,
+                riskLevel: metrics.riskLevel,
+            });
+            return (0, response_1.ok)(res, created, 201);
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : "Error al guardar métricas";
+            return (0, response_1.fail)(res, message, 502);
+        }
     }
     static async recalculate(req, res) {
         const id = String(req.params.id ?? "");
