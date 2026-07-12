@@ -5,9 +5,19 @@ const env_1 = require("../../shared/config/env");
 // ── Mapper ───────────────────────────────────────────────────────
 function mapMealPlanDay(day) {
     const meals = [];
+    // Solo 3 comidas fijas: Desayuno, Comida, Cena
+    const sectionMap = {
+        Breakfast: "Desayuno",
+        Lunch: "Comida",
+        Dinner: "Cena",
+    };
     for (const [sectionName, sectionData] of Object.entries(day.sections ?? {})) {
         const recipe = sectionData._recipe;
         if (!recipe)
+            continue;
+        // Ignorar secciones que no sean Breakfast, Lunch o Dinner
+        const mealName = sectionMap[sectionName];
+        if (!mealName)
             continue;
         const nutrients = recipe.totalNutrients ?? {};
         const item = {
@@ -22,7 +32,7 @@ function mapMealPlanDay(day) {
             ...(recipe.image ? { imageUrl: recipe.image } : {}),
             ...(recipe.url ? { sourceUrl: recipe.url } : {}),
         };
-        meals.push({ name: sectionName, items: [item] });
+        meals.push({ name: mealName, items: [item] });
     }
     return meals;
 }

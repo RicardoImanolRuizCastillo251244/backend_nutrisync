@@ -11,9 +11,12 @@ const dietPlanValidators_1 = require("../validators/dietPlanValidators");
 const dietPlanCrudValidators_1 = require("../validators/dietPlanCrudValidators");
 const assignmentValidators_1 = require("../validators/assignmentValidators");
 const router = (0, express_1.Router)();
+// Patient endpoint — no requiere rol de nutriólogo
+router.get("/my-plan", authMiddleware_1.requireAuth, DietPlanController_1.DietPlanController.getMyPlan);
 router.use(authMiddleware_1.requireAuth, (0, requireRole_1.requireRole)("nutritionist"));
 // Existing endpoints
 router.post("/generate-suggested", (0, validate_1.validateBody)(dietPlanValidators_1.generateDietPlanSchema), DietPlanController_1.DietPlanController.generateSuggested);
+router.post("/calculate-item", DietPlanController_1.DietPlanController.calculateItem);
 router.get("/foods/search", DietPlanController_1.DietPlanController.searchFood);
 // CRUD endpoints
 /**
@@ -177,5 +180,7 @@ router.delete("/:id", DietPlanCrudController_1.DietPlanCrudController.remove);
  */
 router.post("/:id/assign", (0, validate_1.validateBody)(assignmentValidators_1.assignPlanSchema), AssignmentController_1.AssignmentController.assign);
 router.post("/:id/unassign", (0, validate_1.validateBody)(assignmentValidators_1.unassignPlanSchema), AssignmentController_1.AssignmentController.unassign);
+router.get("/:id/assignments/active", AssignmentController_1.AssignmentController.getActiveAssignmentsByPlan);
+router.get("/patients/:patientId/assignments", AssignmentController_1.AssignmentController.getAssignments);
 exports.default = router;
 //# sourceMappingURL=dietPlanRoutes.js.map

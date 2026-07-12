@@ -185,5 +185,7 @@ router.delete("/:id", DietPlanCrudController.remove);
  */
 router.post("/:id/assign", validateBody(assignPlanSchema), AssignmentController.assign);
 router.post("/:id/unassign", validateBody(unassignPlanSchema), AssignmentController.unassign);
+router.get("/:id/assignments/active", AssignmentController.getActiveAssignmentsByPlan);
+router.get("/patients/:patientId/assignments", AssignmentController.getAssignments);
 
 export default router;

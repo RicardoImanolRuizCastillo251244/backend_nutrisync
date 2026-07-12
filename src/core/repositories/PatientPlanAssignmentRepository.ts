@@ -4,5 +4,6 @@ export interface PatientPlanAssignmentRepository {
   assign(patientId: string, planId: string, nutritionistUserId: string): Promise<PatientPlanAssignmentEntity>;
   unassign(patientId: string, planId: string): Promise<PatientPlanAssignmentEntity | null>;
   findActiveByPatient(patientId: string): Promise<PatientPlanAssignmentEntity | null>;
-  findByPatient(patientId: string): Promise<PatientPlanAssignmentEntity[]>;
+  findByPatient(patientId: string, nutritionistUserId: string): Promise<PatientPlanAssignmentEntity[]>;
+  findActiveByPlan(planId: string, nutritionistUserId: string): Promise<PatientPlanAssignmentEntity[]>;
 }

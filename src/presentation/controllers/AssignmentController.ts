@@ -33,7 +33,13 @@ export class AssignmentController {
 
   static async getAssignments(req: Request, res: Response) {
     const patientId = String(req.params.patientId ?? "");
-    const assignments = await repository.findByPatient(patientId);
+    const assignments = await repository.findByPatient(patientId, req.user!.userId);
+    return ok(res, assignments);
+  }
+
+  static async getActiveAssignmentsByPlan(req: Request, res: Response) {
+    const planId = String(req.params.id ?? "");
+    const assignments = await repository.findActiveByPlan(planId, req.user!.userId);
     return ok(res, assignments);
   }
 }

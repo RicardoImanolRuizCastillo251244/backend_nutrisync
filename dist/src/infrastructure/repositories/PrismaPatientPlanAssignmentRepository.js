@@ -58,9 +58,24 @@ class PrismaPatientPlanAssignmentRepository {
             endedAt: assignment.endedAt,
         };
     }
-    async findByPatient(patientId) {
+    async findByPatient(patientId, nutritionistUserId) {
         const assignments = await prisma_1.prisma.patientPlanAssignment.findMany({
-            where: { patientId },
+            where: { patientId, nutritionistUserId },
+            orderBy: { assignedAt: "desc" },
+        });
+        return assignments.map((a) => ({
+            id: a.id,
+            patientId: a.patientId,
+            planId: a.planId,
+            nutritionistUserId: a.nutritionistUserId,
+            active: a.active,
+            assignedAt: a.assignedAt,
+            endedAt: a.endedAt,
+        }));
+    }
+    async findActiveByPlan(planId, nutritionistUserId) {
+        const assignments = await prisma_1.prisma.patientPlanAssignment.findMany({
+            where: { planId, nutritionistUserId, active: true },
             orderBy: { assignedAt: "desc" },
         });
         return assignments.map((a) => ({

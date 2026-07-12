@@ -65,9 +65,26 @@ export class PrismaPatientPlanAssignmentRepository implements PatientPlanAssignm
     };
   }
 
-  async findByPatient(patientId: string): Promise<PatientPlanAssignmentEntity[]> {
+  async findByPatient(patientId: string, nutritionistUserId: string): Promise<PatientPlanAssignmentEntity[]> {
     const assignments = await prisma.patientPlanAssignment.findMany({
-      where: { patientId },
+      where: { patientId, nutritionistUserId },
+      orderBy: { assignedAt: "desc" },
+    });
+
+    return assignments.map((a) => ({
+      id: a.id,
+      patientId: a.patientId,
+      planId: a.planId,
+      nutritionistUserId: a.nutritionistUserId,
+      active: a.active,
+      assignedAt: a.assignedAt,
+      endedAt: a.endedAt,
+    }));
+  }
+
+  async findActiveByPlan(planId: string, nutritionistUserId: string): Promise<PatientPlanAssignmentEntity[]> {
+    const assignments = await prisma.patientPlanAssignment.findMany({
+      where: { planId, nutritionistUserId, active: true },
       orderBy: { assignedAt: "desc" },
     });
 
