@@ -76,7 +76,7 @@ export class ClinicalRecordController {
         return fail(res, "No tienes un perfil de paciente asociado", 403);
       }
 
-      const { weightKg, heightCm, dateOfBirth, gender } = req.body;
+      const { weightKg, heightCm, dateOfBirth, gender, name } = req.body;
       if (!weightKg || !heightCm || !dateOfBirth || !gender) {
         return fail(res, "Faltan datos: weightKg, heightCm, dateOfBirth, gender", 400);
       }
@@ -104,6 +104,7 @@ export class ClinicalRecordController {
       );
 
       const dataPayload = {
+        name: String(name ?? ''),
         weightKg: Number(weightKg),
         heightCm: Number(heightCm),
         age,
