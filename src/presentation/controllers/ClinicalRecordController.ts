@@ -61,6 +61,7 @@ export class ClinicalRecordController {
       }
 
       const latest = records.sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+      if (!latest) return ok(res, null);
       return ok(res, latest.data);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al obtener métricas";
