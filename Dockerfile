@@ -7,7 +7,6 @@ RUN npm ci
 
 COPY . .
 RUN npx prisma generate
-RUN npx prisma migrate deploy
 RUN npm run build
 
 # ── Stage 2: Runtime ────────────────────────
@@ -22,4 +21,4 @@ COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 RUN npm ci --omit=dev
 
 EXPOSE 3001
-CMD ["node", "dist/src/server.js"]
+CMD npx prisma migrate deploy && node dist/src/server.js
