@@ -9,46 +9,88 @@ const repository = new PrismaClinicalRecordRepository();
 const createUseCase = new CreateClinicalRecordUseCase(repository);
 const updateUseCase = new UpdateClinicalRecordUseCase(repository);
 
+function mapClinicalRecordError(error: unknown): { status: number; message: string } {
+  const code = (error as { code?: string } | null | undefined)?.code;
+  const message = error instanceof Error ? error.message : "Internal server error";
+  const missingColumnPattern = /column .* does not exist/i;
+  const clinicalRecordPattern = /clinicalrecord|clinical_record|"ClinicalRecord"/i;
+
+  if (code === "P2022" || (missingColumnPattern.test(message) && clinicalRecordPattern.test(message))) {
+    return {
+      status: 503,
+      message:
+        "La base de datos no esta actualizada para ClinicalRecord. Ejecuta migraciones pendientes (prisma migrate deploy) y reinicia el backend.",
+    };
+  }
+
+  return { status: 500, message };
+}
+
 export class ClinicalRecordController {
   static async create(req: Request, res: Response) {
-    const record = await createUseCase.execute(req.body);
-    return ok(res, record, 201);
+    try {
+      const record = await createUseCase.execute(req.body);
+      return ok(res, record, 201);
+    } catch (error) {
+      const mapped = mapClinicalRecordError(error);
+      return fail(res, mapped.message, mapped.status);
+    }
   }
 
   static async list(req: Request, res: Response) {
-    const patientId = String(req.params.patientId ?? "");
-    const records = await repository.listByPatient(patientId);
-    return ok(res, records);
+    try {
+      const patientId = String(req.params.patientId ?? "");
+      const records = await repository.listByPatient(patientId);
+      return ok(res, records);
+    } catch (error) {
+      const mapped = mapClinicalRecordError(error);
+      return fail(res, mapped.message, mapped.status);
+    }
   }
 
   static async getById(req: Request, res: Response) {
-    const id = String(req.params.id ?? "");
-    const patientId = String(req.params.patientId ?? "");
-    const record = await repository.getById(id, patientId);
-    if (!record) return fail(res, "Clinical record not found", 404);
-    return ok(res, record);
+    try {
+      const id = String(req.params.id ?? "");
+      const patientId = String(req.params.patientId ?? req.query.patientId ?? "");
+      const record = await repository.getById(id, patientId);
+      if (!record) return fail(res, "Clinical record not found", 404);
+      return ok(res, record);
+    } catch (error) {
+      const mapped = mapClinicalRecordError(error);
+      return fail(res, mapped.message, mapped.status);
+    }
   }
 
   static async update(req: Request, res: Response) {
-    const id = String(req.params.id ?? "");
-    const body = req.body as Record<string, unknown>;
-    const patientId = String(body.patientId ?? req.params.patientId ?? "");
-    const updated = await updateUseCase.execute({
-      id,
-      patientId,
-      ...req.body,
-      ...(typeof body.date === 'string' ? { date: body.date } : {}),
-    });
-    if (!updated) return fail(res, "Clinical record not found", 404);
-    return ok(res, updated);
+    try {
+      const id = String(req.params.id ?? "");
+      const body = req.body as Record<string, unknown>;
+      const patientId = String(body.patientId ?? req.params.patientId ?? "");
+      const updated = await updateUseCase.execute({
+        id,
+        patientId,
+        ...req.body,
+        ...(typeof body.date === "string" ? { date: body.date } : {}),
+      });
+      if (!updated) return fail(res, "Clinical record not found", 404);
+      return ok(res, updated);
+    } catch (error) {
+      const mapped = mapClinicalRecordError(error);
+      return fail(res, mapped.message, mapped.status);
+    }
   }
 
   static async remove(req: Request, res: Response) {
-    const id = String(req.params.id ?? "");
-    const body = req.body as Record<string, unknown>;
-    const patientId = String(body.patientId ?? req.params.patientId ?? "");
-    await repository.softDelete(id, patientId);
-    return ok(res, { message: "Clinical record deleted" });
+    try {
+      const id = String(req.params.id ?? "");
+      const body = req.body as Record<string, unknown>;
+      const patientId = String(body.patientId ?? req.params.patientId ?? "");
+      await repository.softDelete(id, patientId);
+      return ok(res, { message: "Clinical record deleted" });
+    } catch (error) {
+      const mapped = mapClinicalRecordError(error);
+      return fail(res, mapped.message, mapped.status);
+    }
   }
 
   static async getMetrics(req: Request, res: Response) {
@@ -133,19 +175,24 @@ export class ClinicalRecordController {
   }
 
   static async recalculate(req: Request, res: Response) {
-    const id = String(req.params.id ?? "");
-    const patientId = String(req.params.patientId ?? "");
+    try {
+      const id = String(req.params.id ?? "");
+      const patientId = String(req.params.patientId ?? "");
 
-    const existing = await repository.getById(id, patientId);
-    if (!existing) return fail(res, "Clinical record not found", 404);
+      const existing = await repository.getById(id, patientId);
+      if (!existing) return fail(res, "Clinical record not found", 404);
 
-    const updateData = req.body as Record<string, unknown>;
-    const updated = await updateUseCase.execute({
-      id,
-      patientId,
-      ...updateData,
-    });
-    if (!updated) return fail(res, "Clinical record not found", 404);
-    return ok(res, updated);
+      const updateData = req.body as Record<string, unknown>;
+      const updated = await updateUseCase.execute({
+        id,
+        patientId,
+        ...updateData,
+      });
+      if (!updated) return fail(res, "Clinical record not found", 404);
+      return ok(res, updated);
+    } catch (error) {
+      const mapped = mapClinicalRecordError(error);
+      return fail(res, mapped.message, mapped.status);
+    }
   }
 }

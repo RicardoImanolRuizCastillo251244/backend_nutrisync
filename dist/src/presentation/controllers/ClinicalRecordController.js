@@ -9,43 +9,87 @@ const response_1 = require("../../shared/utils/response");
 const repository = new PrismaClinicalRecordRepository_1.PrismaClinicalRecordRepository();
 const createUseCase = new CreateClinicalRecordUseCase_1.CreateClinicalRecordUseCase(repository);
 const updateUseCase = new UpdateClinicalRecordUseCase_1.UpdateClinicalRecordUseCase(repository);
+function mapClinicalRecordError(error) {
+    const code = error?.code;
+    const message = error instanceof Error ? error.message : "Internal server error";
+    const missingColumnPattern = /column .* does not exist/i;
+    const clinicalRecordPattern = /clinicalrecord|clinical_record|"ClinicalRecord"/i;
+    if (code === "P2022" || (missingColumnPattern.test(message) && clinicalRecordPattern.test(message))) {
+        return {
+            status: 503,
+            message: "La base de datos no esta actualizada para ClinicalRecord. Ejecuta migraciones pendientes (prisma migrate deploy) y reinicia el backend.",
+        };
+    }
+    return { status: 500, message };
+}
 class ClinicalRecordController {
     static async create(req, res) {
-        const record = await createUseCase.execute(req.body);
-        return (0, response_1.ok)(res, record, 201);
+        try {
+            const record = await createUseCase.execute(req.body);
+            return (0, response_1.ok)(res, record, 201);
+        }
+        catch (error) {
+            const mapped = mapClinicalRecordError(error);
+            return (0, response_1.fail)(res, mapped.message, mapped.status);
+        }
     }
     static async list(req, res) {
-        const patientId = String(req.params.patientId ?? "");
-        const records = await repository.listByPatient(patientId);
-        return (0, response_1.ok)(res, records);
+        try {
+            const patientId = String(req.params.patientId ?? "");
+            const records = await repository.listByPatient(patientId);
+            return (0, response_1.ok)(res, records);
+        }
+        catch (error) {
+            const mapped = mapClinicalRecordError(error);
+            return (0, response_1.fail)(res, mapped.message, mapped.status);
+        }
     }
     static async getById(req, res) {
-        const id = String(req.params.id ?? "");
-        const patientId = String(req.params.patientId ?? "");
-        const record = await repository.getById(id, patientId);
-        if (!record)
-            return (0, response_1.fail)(res, "Clinical record not found", 404);
-        return (0, response_1.ok)(res, record);
+        try {
+            const id = String(req.params.id ?? "");
+            const patientId = String(req.params.patientId ?? req.query.patientId ?? "");
+            const record = await repository.getById(id, patientId);
+            if (!record)
+                return (0, response_1.fail)(res, "Clinical record not found", 404);
+            return (0, response_1.ok)(res, record);
+        }
+        catch (error) {
+            const mapped = mapClinicalRecordError(error);
+            return (0, response_1.fail)(res, mapped.message, mapped.status);
+        }
     }
     static async update(req, res) {
-        const id = String(req.params.id ?? "");
-        const body = req.body;
-        const patientId = String(body.patientId ?? req.params.patientId ?? "");
-        const updated = await updateUseCase.execute({
-            id,
-            patientId,
-            ...req.body,
-        });
-        if (!updated)
-            return (0, response_1.fail)(res, "Clinical record not found", 404);
-        return (0, response_1.ok)(res, updated);
+        try {
+            const id = String(req.params.id ?? "");
+            const body = req.body;
+            const patientId = String(body.patientId ?? req.params.patientId ?? "");
+            const updated = await updateUseCase.execute({
+                id,
+                patientId,
+                ...req.body,
+                ...(typeof body.date === "string" ? { date: body.date } : {}),
+            });
+            if (!updated)
+                return (0, response_1.fail)(res, "Clinical record not found", 404);
+            return (0, response_1.ok)(res, updated);
+        }
+        catch (error) {
+            const mapped = mapClinicalRecordError(error);
+            return (0, response_1.fail)(res, mapped.message, mapped.status);
+        }
     }
     static async remove(req, res) {
-        const id = String(req.params.id ?? "");
-        const body = req.body;
-        const patientId = String(body.patientId ?? req.params.patientId ?? "");
-        await repository.softDelete(id, patientId);
-        return (0, response_1.ok)(res, { message: "Clinical record deleted" });
+        try {
+            const id = String(req.params.id ?? "");
+            const body = req.body;
+            const patientId = String(body.patientId ?? req.params.patientId ?? "");
+            await repository.softDelete(id, patientId);
+            return (0, response_1.ok)(res, { message: "Clinical record deleted" });
+        }
+        catch (error) {
+            const mapped = mapClinicalRecordError(error);
+            return (0, response_1.fail)(res, mapped.message, mapped.status);
+        }
     }
     static async getMetrics(req, res) {
         try {
@@ -119,20 +163,26 @@ class ClinicalRecordController {
         }
     }
     static async recalculate(req, res) {
-        const id = String(req.params.id ?? "");
-        const patientId = String(req.params.patientId ?? "");
-        const existing = await repository.getById(id, patientId);
-        if (!existing)
-            return (0, response_1.fail)(res, "Clinical record not found", 404);
-        const updateData = req.body;
-        const updated = await updateUseCase.execute({
-            id,
-            patientId,
-            ...updateData,
-        });
-        if (!updated)
-            return (0, response_1.fail)(res, "Clinical record not found", 404);
-        return (0, response_1.ok)(res, updated);
+        try {
+            const id = String(req.params.id ?? "");
+            const patientId = String(req.params.patientId ?? "");
+            const existing = await repository.getById(id, patientId);
+            if (!existing)
+                return (0, response_1.fail)(res, "Clinical record not found", 404);
+            const updateData = req.body;
+            const updated = await updateUseCase.execute({
+                id,
+                patientId,
+                ...updateData,
+            });
+            if (!updated)
+                return (0, response_1.fail)(res, "Clinical record not found", 404);
+            return (0, response_1.ok)(res, updated);
+        }
+        catch (error) {
+            const mapped = mapClinicalRecordError(error);
+            return (0, response_1.fail)(res, mapped.message, mapped.status);
+        }
     }
 }
 exports.ClinicalRecordController = ClinicalRecordController;
