@@ -60,7 +60,7 @@ class ClinicalRecordController {
             const latest = records.sort((a, b) => b.date.getTime() - a.date.getTime())[0];
             if (!latest)
                 return (0, response_1.ok)(res, null);
-            return (0, response_1.ok)(res, latest.data);
+            return (0, response_1.ok)(res, latest);
         }
         catch (error) {
             const message = error instanceof Error ? error.message : "Error al obtener métricas";
@@ -94,31 +94,22 @@ class ClinicalRecordController {
             const existingRecords = await repository.listByPatient(patientId);
             const todayStr = now.toISOString().slice(0, 10);
             const todayRecord = existingRecords.find((r) => r.date.toISOString().slice(0, 10) === todayStr);
-            const dataPayload = {
+            const data = {
                 name: String(name ?? ''),
                 weightKg: Number(weightKg),
                 heightCm: Number(heightCm),
                 age,
-                gender: gender,
-                dateOfBirth: dateOfBirth,
+                sex: gender === "male" ? "Masculino" : "Femenino",
                 ...metrics,
             };
             if (todayRecord) {
-                const updated = await repository.update(todayRecord.id, patientId, {
-                    data: dataPayload,
-                    bmi: metrics.bmi,
-                    bodyFatPercentage: metrics.bodyFatPercentage,
-                    riskLevel: metrics.riskLevel,
-                });
+                const updated = await repository.update(todayRecord.id, patientId, data);
                 return (0, response_1.ok)(res, updated);
             }
             const created = await repository.create({
                 patientId,
                 date: new Date(),
-                data: dataPayload,
-                bmi: metrics.bmi,
-                bodyFatPercentage: metrics.bodyFatPercentage,
-                riskLevel: metrics.riskLevel,
+                ...data,
             });
             return (0, response_1.ok)(res, created, 201);
         }
@@ -137,7 +128,7 @@ class ClinicalRecordController {
         const updated = await updateUseCase.execute({
             id,
             patientId,
-            data: updateData,
+            ...updateData,
         });
         if (!updated)
             return (0, response_1.fail)(res, "Clinical record not found", 404);

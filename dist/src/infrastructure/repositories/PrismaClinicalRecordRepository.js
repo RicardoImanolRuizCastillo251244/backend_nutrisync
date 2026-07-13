@@ -2,73 +2,99 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaClinicalRecordRepository = void 0;
 const prisma_1 = require("../database/prisma");
+function mapRow(row) {
+    return {
+        id: row.id,
+        patientId: row.patientId,
+        date: row.date,
+        name: row.name,
+        sex: row.sex,
+        age: row.age,
+        occupation: row.occupation,
+        bloodType: row.bloodType,
+        consultationReason: row.consultationReason,
+        phone: row.phone,
+        weightKg: row.weightKg,
+        heightCm: row.heightCm,
+        maritalStatus: row.maritalStatus,
+        allergies: row.allergies,
+        feedingDifficulty: row.feedingDifficulty,
+        address: row.address,
+        familyObesity: row.familyObesity,
+        familyCancer: row.familyCancer,
+        familyHypertension: row.familyHypertension,
+        familyHIV: row.familyHIV,
+        familyDiabetesType1: row.familyDiabetesType1,
+        familyDiabetesType2: row.familyDiabetesType2,
+        familyOther: row.familyOther,
+        personalDiarrhea: row.personalDiarrhea,
+        personalColitis: row.personalColitis,
+        personalReflux: row.personalReflux,
+        personalConstipation: row.personalConstipation,
+        personalNausea: row.personalNausea,
+        personalGastritis: row.personalGastritis,
+        personalVomiting: row.personalVomiting,
+        personalOther: row.personalOther,
+        labGlucose: row.labGlucose,
+        labCholesterol: row.labCholesterol,
+        labTriglycerides: row.labTriglycerides,
+        physicalHair: row.physicalHair,
+        physicalMouth: row.physicalMouth,
+        physicalTeeth: row.physicalTeeth,
+        physicalEyes: row.physicalEyes,
+        physicalGums: row.physicalGums,
+        physicalNails: row.physicalNails,
+        bmi: row.bmi,
+        bmiClassification: row.bmiClassification,
+        bodyFatPercentage: row.bodyFatPercentage,
+        visceralFat: row.visceralFat,
+        muscleMass: row.muscleMass,
+        biologicalAge: row.biologicalAge,
+        restingMetabolism: row.restingMetabolism,
+        riskLevel: row.riskLevel,
+        deletedAt: row.deletedAt,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+    };
+}
 class PrismaClinicalRecordRepository {
     async create(input) {
         const record = await prisma_1.prisma.clinicalRecord.create({
-            data: {
-                patientId: input.patientId,
-                date: input.date,
-                data: JSON.parse(JSON.stringify(input.data)),
-                bmi: input.bmi ?? null,
-                bodyFatPercentage: input.bodyFatPercentage ?? null,
-                riskLevel: input.riskLevel ?? null,
-            },
+            data: input,
         });
-        return {
-            ...record,
-            data: record.data,
-        };
+        return mapRow(record);
     }
     async getById(id, patientId) {
         const record = await prisma_1.prisma.clinicalRecord.findFirst({
-            where: { id, patientId },
+            where: { id, patientId, deletedAt: null },
         });
         if (!record)
             return null;
-        return {
-            ...record,
-            data: record.data,
-        };
+        return mapRow(record);
     }
     async listByPatient(patientId) {
         const rows = await prisma_1.prisma.clinicalRecord.findMany({
-            where: { patientId },
+            where: { patientId, deletedAt: null },
             orderBy: { date: "desc" },
         });
-        return rows.map((row) => ({
-            ...row,
-            data: row.data,
-        }));
+        return rows.map(mapRow);
     }
     async update(id, patientId, updates) {
         const existing = await prisma_1.prisma.clinicalRecord.findFirst({
-            where: { id, patientId },
+            where: { id, patientId, deletedAt: null },
         });
         if (!existing)
             return null;
-        const data = {};
-        if (updates.date !== undefined)
-            data.date = updates.date;
-        if (updates.data !== undefined)
-            data.data = JSON.parse(JSON.stringify(updates.data));
-        if (updates.bmi !== undefined)
-            data.bmi = updates.bmi;
-        if (updates.bodyFatPercentage !== undefined)
-            data.bodyFatPercentage = updates.bodyFatPercentage;
-        if (updates.riskLevel !== undefined)
-            data.riskLevel = updates.riskLevel;
         const updated = await prisma_1.prisma.clinicalRecord.update({
             where: { id },
-            data,
+            data: updates,
         });
-        return {
-            ...updated,
-            data: updated.data,
-        };
+        return mapRow(updated);
     }
     async softDelete(id, patientId) {
-        await prisma_1.prisma.clinicalRecord.deleteMany({
-            where: { id, patientId },
+        await prisma_1.prisma.clinicalRecord.updateMany({
+            where: { id, patientId, deletedAt: null },
+            data: { deletedAt: new Date() },
         });
     }
 }

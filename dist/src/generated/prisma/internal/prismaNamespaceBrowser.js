@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.ProgressLogScalarFieldEnum = exports.MedicationTakeScalarFieldEnum = exports.MedicationScalarFieldEnum = exports.MoodLogScalarFieldEnum = exports.HydrationLogScalarFieldEnum = exports.VoiceNoteScalarFieldEnum = exports.MealLogScalarFieldEnum = exports.PatientPlanAssignmentScalarFieldEnum = exports.MealFoodItemScalarFieldEnum = exports.MealScalarFieldEnum = exports.DietDayScalarFieldEnum = exports.DietPlanScalarFieldEnum = exports.ClinicalRecordScalarFieldEnum = exports.RefreshSessionScalarFieldEnum = exports.PatientScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.ProgressLogScalarFieldEnum = exports.MedicationTakeScalarFieldEnum = exports.MedicationScalarFieldEnum = exports.MoodLogScalarFieldEnum = exports.HydrationLogScalarFieldEnum = exports.VoiceNoteScalarFieldEnum = exports.MealLogScalarFieldEnum = exports.PatientPlanAssignmentScalarFieldEnum = exports.MealFoodItemScalarFieldEnum = exports.MealScalarFieldEnum = exports.DietDayScalarFieldEnum = exports.DietPlanScalarFieldEnum = exports.ClinicalRecordScalarFieldEnum = exports.RefreshSessionScalarFieldEnum = exports.PatientScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -136,10 +136,52 @@ exports.ClinicalRecordScalarFieldEnum = {
     id: 'id',
     patientId: 'patientId',
     date: 'date',
-    data: 'data',
+    name: 'name',
+    sex: 'sex',
+    age: 'age',
+    occupation: 'occupation',
+    bloodType: 'bloodType',
+    consultationReason: 'consultationReason',
+    phone: 'phone',
+    weightKg: 'weightKg',
+    heightCm: 'heightCm',
+    maritalStatus: 'maritalStatus',
+    allergies: 'allergies',
+    feedingDifficulty: 'feedingDifficulty',
+    address: 'address',
+    familyObesity: 'familyObesity',
+    familyCancer: 'familyCancer',
+    familyHypertension: 'familyHypertension',
+    familyHIV: 'familyHIV',
+    familyDiabetesType1: 'familyDiabetesType1',
+    familyDiabetesType2: 'familyDiabetesType2',
+    familyOther: 'familyOther',
+    personalDiarrhea: 'personalDiarrhea',
+    personalColitis: 'personalColitis',
+    personalReflux: 'personalReflux',
+    personalConstipation: 'personalConstipation',
+    personalNausea: 'personalNausea',
+    personalGastritis: 'personalGastritis',
+    personalVomiting: 'personalVomiting',
+    personalOther: 'personalOther',
+    labGlucose: 'labGlucose',
+    labCholesterol: 'labCholesterol',
+    labTriglycerides: 'labTriglycerides',
+    physicalHair: 'physicalHair',
+    physicalMouth: 'physicalMouth',
+    physicalTeeth: 'physicalTeeth',
+    physicalEyes: 'physicalEyes',
+    physicalGums: 'physicalGums',
+    physicalNails: 'physicalNails',
     bmi: 'bmi',
+    bmiClassification: 'bmiClassification',
     bodyFatPercentage: 'bodyFatPercentage',
+    visceralFat: 'visceralFat',
+    muscleMass: 'muscleMass',
+    biologicalAge: 'biologicalAge',
+    restingMetabolism: 'restingMetabolism',
     riskLevel: 'riskLevel',
+    deletedAt: 'deletedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
@@ -250,9 +292,6 @@ exports.SortOrder = {
     asc: 'asc',
     desc: 'desc'
 };
-exports.JsonNullValueInput = {
-    JsonNull: exports.JsonNull
-};
 exports.QueryMode = {
     default: 'default',
     insensitive: 'insensitive'
@@ -260,10 +299,5 @@ exports.QueryMode = {
 exports.NullsOrder = {
     first: 'first',
     last: 'last'
-};
-exports.JsonNullValueFilter = {
-    DbNull: exports.DbNull,
-    JsonNull: exports.JsonNull,
-    AnyNull: exports.AnyNull
 };
 //# sourceMappingURL=prismaNamespaceBrowser.js.map
