@@ -29,7 +29,12 @@ function mapClinicalRecordError(error: unknown): { status: number; message: stri
 export class ClinicalRecordController {
   static async create(req: Request, res: Response) {
     try {
-      const record = await createUseCase.execute(req.body);
+      const body = req.body as Record<string, unknown>;
+      const input: any = {
+        ...body,
+        date: body.date ? new Date(body.date as string) : new Date(),
+      };
+      const record = await createUseCase.execute(input);
       return ok(res, record, 201);
     } catch (error) {
       const mapped = mapClinicalRecordError(error);
