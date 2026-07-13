@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -73,17 +68,73 @@ model RefreshSession {
 }
 
 model ClinicalRecord {
-  id                 String   @id @default(uuid())
-  patientId          String
-  date               DateTime @default(now())
-  data               Json
-  bmi                Float?
-  bodyFatPercentage  Float?
-  riskLevel          String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                  String   @id @default(uuid())
+  patientId           String
+  date                DateTime @default(now())
 
-  patient            Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  // Datos personales
+  name                String?  @db.VarChar(255)
+  sex                 String?  @db.VarChar(50)
+  age                 Int?
+  occupation          String?  @db.VarChar(255)
+  bloodType           String?  @db.VarChar(10)
+  consultationReason  String?  @db.VarChar(500)
+  phone               String?  @db.VarChar(50)
+  weightKg            Float?
+  heightCm            Float?
+  maritalStatus       String?  @db.VarChar(100)
+  allergies           String?  @db.VarChar(500)
+  feedingDifficulty   Boolean  @default(false)
+  address             String?  @db.VarChar(255)
+
+  // Antecedentes heredofamiliares
+  familyObesity       Boolean  @default(false)
+  familyCancer        Boolean  @default(false)
+  familyHypertension  Boolean  @default(false)
+  familyHIV           Boolean  @default(false)
+  familyDiabetesType1 Boolean  @default(false)
+  familyDiabetesType2 Boolean  @default(false)
+  familyOther         String?  @db.VarChar(255)
+
+  // Antecedentes patológicos personales
+  personalDiarrhea    Boolean  @default(false)
+  personalColitis     Boolean  @default(false)
+  personalReflux      Boolean  @default(false)
+  personalConstipation Boolean @default(false)
+  personalNausea      Boolean  @default(false)
+  personalGastritis   Boolean  @default(false)
+  personalVomiting    Boolean  @default(false)
+  personalOther       String?  @db.VarChar(255)
+
+  // Laboratorios
+  labGlucose          Float?
+  labCholesterol      Float?
+  labTriglycerides    Float?
+
+  // Exploración física
+  physicalHair        String?  @db.VarChar(100)
+  physicalMouth       String?  @db.VarChar(100)
+  physicalTeeth       String?  @db.VarChar(100)
+  physicalEyes        String?  @db.VarChar(100)
+  physicalGums        String?  @db.VarChar(100)
+  physicalNails       String?  @db.VarChar(100)
+
+  // Métricas calculadas
+  bmi                 Float?
+  bmiClassification   String?  @db.VarChar(100)
+  bodyFatPercentage   Float?
+  visceralFat         Float?
+  muscleMass          Float?
+  biologicalAge       Int?
+  restingMetabolism   Int?
+  riskLevel           String?  @db.VarChar(100)
+
+  // Metadata
+  deletedAt           DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  patient             Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
 }
 
 model DietPlan {

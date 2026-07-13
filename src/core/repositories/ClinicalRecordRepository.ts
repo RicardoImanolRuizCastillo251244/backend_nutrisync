@@ -1,26 +1,63 @@
 import type { ClinicalRecordEntity } from "../domain/entities/ClinicalRecord";
 
-export interface CreateClinicalRecordInput {
+export interface ClinicalRecordInput {
   patientId: string;
   date: Date;
-  data: Record<string, unknown>;
+  name?: string | null;
+  sex?: string | null;
+  age?: number | null;
+  occupation?: string | null;
+  bloodType?: string | null;
+  consultationReason?: string | null;
+  phone?: string | null;
+  weightKg?: number | null;
+  heightCm?: number | null;
+  maritalStatus?: string | null;
+  allergies?: string | null;
+  feedingDifficulty?: boolean | null;
+  address?: string | null;
+  familyObesity?: boolean | null;
+  familyCancer?: boolean | null;
+  familyHypertension?: boolean | null;
+  familyHIV?: boolean | null;
+  familyDiabetesType1?: boolean | null;
+  familyDiabetesType2?: boolean | null;
+  familyOther?: string | null;
+  personalDiarrhea?: boolean | null;
+  personalColitis?: boolean | null;
+  personalReflux?: boolean | null;
+  personalConstipation?: boolean | null;
+  personalNausea?: boolean | null;
+  personalGastritis?: boolean | null;
+  personalVomiting?: boolean | null;
+  personalOther?: string | null;
+  labGlucose?: number | null;
+  labCholesterol?: number | null;
+  labTriglycerides?: number | null;
+  physicalHair?: string | null;
+  physicalMouth?: string | null;
+  physicalTeeth?: string | null;
+  physicalEyes?: string | null;
+  physicalGums?: string | null;
+  physicalNails?: string | null;
   bmi?: number | null;
+  bmiClassification?: string | null;
   bodyFatPercentage?: number | null;
+  visceralFat?: number | null;
+  muscleMass?: number | null;
+  biologicalAge?: number | null;
+  restingMetabolism?: number | null;
   riskLevel?: string | null;
 }
 
-export interface UpdateClinicalRecordInput {
+export type ClinicalRecordUpdateInput = Partial<ClinicalRecordInput> & {
   date?: Date;
-  data?: Record<string, unknown>;
-  bmi?: number | null;
-  bodyFatPercentage?: number | null;
-  riskLevel?: string | null;
-}
+};
 
 export interface ClinicalRecordRepository {
-  create(input: CreateClinicalRecordInput): Promise<ClinicalRecordEntity>;
+  create(input: ClinicalRecordInput): Promise<ClinicalRecordEntity>;
   getById(id: string, patientId: string): Promise<ClinicalRecordEntity | null>;
   listByPatient(patientId: string): Promise<ClinicalRecordEntity[]>;
-  update(id: string, patientId: string, updates: UpdateClinicalRecordInput): Promise<ClinicalRecordEntity | null>;
+  update(id: string, patientId: string, updates: ClinicalRecordUpdateInput): Promise<ClinicalRecordEntity | null>;
   softDelete(id: string, patientId: string): Promise<void>;
 }

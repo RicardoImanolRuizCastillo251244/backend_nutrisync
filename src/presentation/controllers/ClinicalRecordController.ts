@@ -64,7 +64,7 @@ export class ClinicalRecordController {
 
       const latest = records.sort((a, b) => b.date.getTime() - a.date.getTime())[0];
       if (!latest) return ok(res, null);
-      return ok(res, latest.data);
+      return ok(res, latest);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al obtener métricas";
       return fail(res, message, 502);
@@ -105,33 +105,24 @@ export class ClinicalRecordController {
         (r) => r.date.toISOString().slice(0, 10) === todayStr
       );
 
-      const dataPayload = {
+      const data = {
         name: String(name ?? ''),
         weightKg: Number(weightKg),
         heightCm: Number(heightCm),
         age,
-        gender: gender as string,
-        dateOfBirth: dateOfBirth as string,
+        sex: gender === "male" ? "Masculino" : "Femenino",
         ...metrics,
       };
 
       if (todayRecord) {
-        const updated = await repository.update(todayRecord.id, patientId, {
-          data: dataPayload,
-          bmi: metrics.bmi,
-          bodyFatPercentage: metrics.bodyFatPercentage,
-          riskLevel: metrics.riskLevel,
-        });
+        const updated = await repository.update(todayRecord.id, patientId, data);
         return ok(res, updated);
       }
 
       const created = await repository.create({
         patientId,
         date: new Date(),
-        data: dataPayload,
-        bmi: metrics.bmi,
-        bodyFatPercentage: metrics.bodyFatPercentage,
-        riskLevel: metrics.riskLevel,
+        ...data,
       });
       return ok(res, created, 201);
     } catch (error) {
@@ -151,7 +142,7 @@ export class ClinicalRecordController {
     const updated = await updateUseCase.execute({
       id,
       patientId,
-      data: updateData,
+      ...updateData,
     });
     if (!updated) return fail(res, "Clinical record not found", 404);
     return ok(res, updated);
