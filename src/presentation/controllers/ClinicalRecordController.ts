@@ -37,6 +37,7 @@ export class ClinicalRecordController {
       id,
       patientId,
       ...req.body,
+      ...(typeof body.date === 'string' ? { date: body.date } : {}),
     });
     if (!updated) return fail(res, "Clinical record not found", 404);
     return ok(res, updated);
