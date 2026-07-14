@@ -24,13 +24,13 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
 
   async listHydrationLogs(patientUserId: string, date?: Date): Promise<HydrationLogEntity[]> {
     const where: Record<string, unknown> = { patientUserId };
-    if (date) where.date = { gte: new Date(date.toISOString().slice(0, 10)), lt: new Date(new Date(date.toISOString().slice(0, 10)).getTime() + 86400000) };
+    if (date) where.loggedAt = { gte: new Date(date.toISOString().slice(0, 10)), lt: new Date(new Date(date.toISOString().slice(0, 10)).getTime() + 86400000) };
     return cast<HydrationLogEntity[]>(prisma.hydrationLog.findMany({ where, orderBy: { loggedAt: "desc" } }));
   }
 
   async listMoodLogs(patientUserId: string, date?: Date): Promise<MoodLogEntity[]> {
     const where: Record<string, unknown> = { patientUserId };
-    if (date) where.date = { gte: new Date(date.toISOString().slice(0, 10)), lt: new Date(new Date(date.toISOString().slice(0, 10)).getTime() + 86400000) };
+    if (date) where.loggedAt = { gte: new Date(date.toISOString().slice(0, 10)), lt: new Date(new Date(date.toISOString().slice(0, 10)).getTime() + 86400000) };
     return cast<MoodLogEntity[]>(prisma.moodLog.findMany({ where, orderBy: { loggedAt: "desc" } }));
   }
 
@@ -46,11 +46,14 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
   }
 
   private async computeSummary(patientUserId: string, from: Date, to: Date): Promise<AdherenceSummary> {
-    const where = { patientUserId, date: { gte: from, lt: to } };
+    const mealsWhere = { patientUserId, date: { gte: from, lt: to } };
+    const hydrationsWhere = { patientUserId, loggedAt: { gte: from, lt: to } };
+    const moodsWhere = { patientUserId, loggedAt: { gte: from, lt: to } };
+
     const [meals, hydrations, moods] = await Promise.all([
-      prisma.mealLog.findMany({ where }),
-      prisma.hydrationLog.findMany({ where }),
-      prisma.moodLog.findMany({ where }),
+      prisma.mealLog.findMany({ where: mealsWhere }),
+      prisma.hydrationLog.findMany({ where: hydrationsWhere }),
+      prisma.moodLog.findMany({ where: moodsWhere }),
     ]);
     const mealsCompleted = meals.filter(m => m.consumed).length;
     const hydrationTotalMl = hydrations.reduce((sum, h) => sum + h.amountMl, 0);
