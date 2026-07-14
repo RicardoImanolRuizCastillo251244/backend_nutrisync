@@ -12,6 +12,25 @@ const createUseCase = new CreateDietPlanUseCase_1.CreateDietPlanUseCase(reposito
 const patientRepo = new PrismaPatientRepository_1.PrismaPatientRepository();
 const assignmentRepo = new PrismaPatientPlanAssignmentRepository_1.PrismaPatientPlanAssignmentRepository();
 const adherenceRepo = new PrismaAdherenceRepository_1.PrismaAdherenceRepository();
+/** Replica exactamente el algoritmo _toEntityId de Flutter (meal_plan_repository_impl.dart) */
+function hashMealId(value) {
+    // Si ya es un número entero, devolverlo directamente
+    if (typeof value === "number" && Number.isInteger(value))
+        return value;
+    if (typeof value === "string") {
+        const parsed = parseInt(value, 10);
+        if (!isNaN(parsed))
+            return parsed;
+    }
+    const text = value == null ? "" : String(value).trim();
+    if (!text)
+        return Date.now();
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+        hash = (hash * 31 + text.charCodeAt(i)) & 0x7fffffff;
+    }
+    return hash === 0 ? Date.now() : hash;
+}
 class DietPlanController {
     static async create(req, res) {
         try {
@@ -79,15 +98,20 @@ class DietPlanController {
                 return (0, response_1.fail)(res, "El plan asignado ya no existe", 404);
             // Enriquecer con estado isConsumed desde los meal logs de adherencia
             const mealLogs = await adherenceRepo.listMealLogs(patient.userId);
-            const consumedMealIds = new Set();
+            const consumedHashes = new Set();
             for (const log of mealLogs) {
                 if (log.consumed && log.mealName.startsWith('meal_')) {
-                    consumedMealIds.add(log.mealName.replace('meal_', ''));
+                    const hashStr = log.mealName.replace('meal_', '');
+                    const hash = parseInt(hashStr, 10);
+                    if (!isNaN(hash))
+                        consumedHashes.add(hash);
                 }
             }
+            // Construir mapa de hash → meal.id real para matching
             for (const day of plan.days ?? []) {
                 for (const meal of day.meals ?? []) {
-                    meal.isConsumed = consumedMealIds.has(meal.id);
+                    const mealHash = hashMealId(meal.id);
+                    meal.isConsumed = consumedHashes.has(mealHash);
                 }
             }
             return (0, response_1.ok)(res, plan);
