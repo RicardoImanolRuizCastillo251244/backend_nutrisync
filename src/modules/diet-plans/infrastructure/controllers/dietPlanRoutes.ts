@@ -5,6 +5,11 @@ import { requireAuth } from "@/presentation/middlewares/authMiddleware";
 import { requireRole } from "@/presentation/middlewares/requireRole";
 
 const router = Router();
+
+// Ruta para pacientes: ver su plan activo
+router.get("/my-plan", requireAuth, DietPlanController.getMyActivePlan);
+
+// Resto de rutas solo para nutriólogos
 router.use(requireAuth, requireRole("nutritionist"));
 
 // CRUD de planes

@@ -1,10 +1,14 @@
 import type { Request, Response } from "express";
 import { CreateDietPlanUseCase } from "@/modules/diet-plans/application/use-cases/CreateDietPlanUseCase";
 import { PrismaDietPlanRepository } from "@/modules/diet-plans/infrastructure/repositories/PrismaDietPlanRepository";
+import { PrismaPatientRepository } from "@/modules/patients/infrastructure/repositories/PrismaPatientRepository";
+import { PrismaPatientPlanAssignmentRepository } from "@/modules/assignments/infrastructure/repositories/PrismaPatientPlanAssignmentRepository";
 import { ok, fail } from "@/shared/utils/response";
 
 const repository = new PrismaDietPlanRepository();
 const createUseCase = new CreateDietPlanUseCase(repository);
+const patientRepo = new PrismaPatientRepository();
+const assignmentRepo = new PrismaPatientPlanAssignmentRepository();
 
 export class DietPlanController {
   static async create(req: Request, res: Response) {
@@ -41,6 +45,25 @@ export class DietPlanController {
     try {
       await repository.softDelete(String(req.params.id ?? ""));
       return ok(res, { message: "Diet plan deleted" });
+    } catch (e) { return fail(res, e instanceof Error ? e.message : "Error", 500); }
+  }
+
+  // GET /my-plan — para pacientes autenticados
+  static async getMyActivePlan(req: Request, res: Response) {
+    try {
+      // Buscar el perfil de paciente por userId del token
+      const patient = await patientRepo.findByUserId(req.user!.userId);
+      if (!patient) return fail(res, "No tienes un perfil de paciente", 403);
+
+      // Buscar la asignación activa para este paciente
+      const activeAssignment = await assignmentRepo.findActiveByPatient(patient.id);
+      if (!activeAssignment) return fail(res, "No tienes un plan activo asignado", 404);
+
+      // Obtener el plan completo
+      const plan = await repository.findById(activeAssignment.planId);
+      if (!plan) return fail(res, "El plan asignado ya no existe", 404);
+
+      return ok(res, plan);
     } catch (e) { return fail(res, e instanceof Error ? e.message : "Error", 500); }
   }
 }
