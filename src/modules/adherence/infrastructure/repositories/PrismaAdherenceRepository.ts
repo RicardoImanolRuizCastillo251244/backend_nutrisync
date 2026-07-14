@@ -1,7 +1,6 @@
 import type { AdherenceRepository, CreateMealLogInput, CreateHydrationLogInput, CreateMoodLogInput, MealLogEntity, HydrationLogEntity, MoodLogEntity, AdherenceSummary } from "@/modules/adherence/domain/ports/repositories/AdherenceRepository";
 import { prisma } from "@/shared/infrastructure/database/prisma";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cast = <T>(v: unknown): T => v as unknown as T;
 
 export class PrismaAdherenceRepository implements AdherenceRepository {
@@ -38,18 +37,24 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
   async getSummary(patientUserId: string, date?: Date): Promise<AdherenceSummary> {
     const today = date ? new Date(date.toISOString().slice(0, 10)) : new Date(new Date().toISOString().slice(0, 10));
     const tomorrow = new Date(today.getTime() + 86400000);
-    const where = { patientUserId, date: { gte: today, lt: tomorrow } };
+    return this.computeSummary(patientUserId, today, tomorrow);
+  }
 
+  async getSummaryInRange(patientUserId: string, from: Date, to?: Date): Promise<AdherenceSummary> {
+    const toDate = to ?? new Date();
+    return this.computeSummary(patientUserId, from, toDate);
+  }
+
+  private async computeSummary(patientUserId: string, from: Date, to: Date): Promise<AdherenceSummary> {
+    const where = { patientUserId, date: { gte: from, lt: to } };
     const [meals, hydrations, moods] = await Promise.all([
       prisma.mealLog.findMany({ where }),
       prisma.hydrationLog.findMany({ where }),
       prisma.moodLog.findMany({ where }),
     ]);
-
     const mealsCompleted = meals.filter(m => m.consumed).length;
     const hydrationTotalMl = hydrations.reduce((sum, h) => sum + h.amountMl, 0);
     const adherenceRate = meals.length > 0 ? mealsCompleted / meals.length : 0;
-
     return {
       mealsLogged: meals.length,
       mealsCompleted,
@@ -57,5 +62,13 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
       moodEntries: moods.length,
       adherenceRate: Math.round(adherenceRate * 100) / 100,
     };
+  }
+
+  async updateMealLog(id: string, data: Partial<MealLogEntity>): Promise<MealLogEntity | null> {
+    try {
+      return cast<MealLogEntity>(prisma.mealLog.update({ where: { id }, data: data as any }));
+    } catch {
+      return null;
+    }
   }
 }

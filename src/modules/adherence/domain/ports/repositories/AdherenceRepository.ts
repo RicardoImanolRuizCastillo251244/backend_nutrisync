@@ -64,4 +64,6 @@ export interface AdherenceRepository {
   listHydrationLogs(patientUserId: string, date?: Date): Promise<HydrationLogEntity[]>;
   listMoodLogs(patientUserId: string, date?: Date): Promise<MoodLogEntity[]>;
   getSummary(patientUserId: string, date?: Date): Promise<AdherenceSummary>;
+  getSummaryInRange(patientUserId: string, from: Date, to?: Date): Promise<AdherenceSummary>;
+  updateMealLog(id: string, data: Partial<MealLogEntity>): Promise<MealLogEntity | null>;
 }

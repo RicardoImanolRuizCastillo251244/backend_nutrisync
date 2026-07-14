@@ -12,10 +12,17 @@ const logHydrationUseCase = new LogHydrationUseCase(repository);
 const logMoodUseCase = new LogMoodUseCase(repository);
 const getSummaryUseCase = new GetAdherenceSummaryUseCase(repository);
 
+// Helper: resolve patientUserId from params, query, or current user
+function getPatientId(req: Request): string {
+  if (req.params.patientUserId) return String(req.params.patientUserId);
+  if (req.query.patientId) return String(req.query.patientId as string);
+  return req.user!.userId;
+}
+
 export class AdherenceController {
   static async logMeal(req: Request, res: Response) {
     try {
-      const log = await logMealUseCase.execute({ patientUserId: req.user!.userId, ...req.body });
+      const log = await logMealUseCase.execute({ patientUserId: getPatientId(req), ...req.body });
       return ok(res, log, 201);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -24,7 +31,7 @@ export class AdherenceController {
 
   static async logHydration(req: Request, res: Response) {
     try {
-      const log = await logHydrationUseCase.execute({ patientUserId: req.user!.userId, ...req.body });
+      const log = await logHydrationUseCase.execute({ patientUserId: getPatientId(req), ...req.body });
       return ok(res, log, 201);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -33,7 +40,7 @@ export class AdherenceController {
 
   static async logMood(req: Request, res: Response) {
     try {
-      const log = await logMoodUseCase.execute({ patientUserId: req.user!.userId, ...req.body });
+      const log = await logMoodUseCase.execute({ patientUserId: getPatientId(req), ...req.body });
       return ok(res, log, 201);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -42,8 +49,11 @@ export class AdherenceController {
 
   static async getSummary(req: Request, res: Response) {
     try {
-      const date = req.query.date as string | undefined;
-      const summary = await getSummaryUseCase.execute(req.user!.userId, date);
+      const patientId = getPatientId(req);
+      const days = req.query.days ? Number(req.query.days) : 30;
+      const from = new Date();
+      from.setDate(from.getDate() - days);
+      const summary = await repository.getSummaryInRange(patientId, from);
       return ok(res, summary);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -52,8 +62,9 @@ export class AdherenceController {
 
   static async listMeals(req: Request, res: Response) {
     try {
+      const patientId = getPatientId(req);
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
-      const logs = await repository.listMealLogs(req.user!.userId, date);
+      const logs = await repository.listMealLogs(patientId, date);
       return ok(res, logs);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -62,9 +73,21 @@ export class AdherenceController {
 
   static async listHydration(req: Request, res: Response) {
     try {
+      const patientId = getPatientId(req);
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
-      const logs = await repository.listHydrationLogs(req.user!.userId, date);
+      const logs = await repository.listHydrationLogs(patientId, date);
       return ok(res, logs);
+    } catch (error) {
+      return fail(res, error instanceof Error ? error.message : "Error", 500);
+    }
+  }
+
+  static async updateMeal(req: Request, res: Response) {
+    try {
+      const id = String(req.params.id ?? "");
+      const updated = await repository.updateMealLog(id, req.body as any);
+      if (!updated) return fail(res, "Meal log not found", 404);
+      return ok(res, updated);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
     }
@@ -72,8 +95,9 @@ export class AdherenceController {
 
   static async listMood(req: Request, res: Response) {
     try {
+      const patientId = getPatientId(req);
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
-      const logs = await repository.listMoodLogs(req.user!.userId, date);
+      const logs = await repository.listMoodLogs(patientId, date);
       return ok(res, logs);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
