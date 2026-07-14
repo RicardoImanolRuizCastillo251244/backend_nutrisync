@@ -3,12 +3,14 @@ import { CreateDietPlanUseCase } from "@/modules/diet-plans/application/use-case
 import { PrismaDietPlanRepository } from "@/modules/diet-plans/infrastructure/repositories/PrismaDietPlanRepository";
 import { PrismaPatientRepository } from "@/modules/patients/infrastructure/repositories/PrismaPatientRepository";
 import { PrismaPatientPlanAssignmentRepository } from "@/modules/assignments/infrastructure/repositories/PrismaPatientPlanAssignmentRepository";
+import { PrismaAdherenceRepository } from "@/modules/adherence/infrastructure/repositories/PrismaAdherenceRepository";
 import { ok, fail } from "@/shared/utils/response";
 
 const repository = new PrismaDietPlanRepository();
 const createUseCase = new CreateDietPlanUseCase(repository);
 const patientRepo = new PrismaPatientRepository();
 const assignmentRepo = new PrismaPatientPlanAssignmentRepository();
+const adherenceRepo = new PrismaAdherenceRepository();
 
 export class DietPlanController {
   static async create(req: Request, res: Response) {
@@ -62,6 +64,21 @@ export class DietPlanController {
       // Obtener el plan completo
       const plan = await repository.findById(activeAssignment.planId);
       if (!plan) return fail(res, "El plan asignado ya no existe", 404);
+
+      // Enriquecer con estado isConsumed desde los meal logs de adherencia
+      const mealLogs = await adherenceRepo.listMealLogs(patient.userId);
+      const consumedMealIds = new Set<string>();
+      for (const log of mealLogs) {
+        if (log.consumed && log.mealName.startsWith('meal_')) {
+          consumedMealIds.add(log.mealName.replace('meal_', ''));
+        }
+      }
+
+      for (const day of (plan as any).days ?? []) {
+        for (const meal of day.meals ?? []) {
+          meal.isConsumed = consumedMealIds.has(meal.id);
+        }
+      }
 
       return ok(res, plan);
     } catch (e) { return fail(res, e instanceof Error ? e.message : "Error", 500); }

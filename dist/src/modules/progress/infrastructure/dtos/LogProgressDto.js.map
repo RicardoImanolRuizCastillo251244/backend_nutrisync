@@ -1,0 +1,1 @@
+{"version":3,"file":"LogProgressDto.js","sourceRoot":"","sources":["../../../../../../src/modules/progress/infrastructure/dtos/LogProgressDto.ts"],"names":[],"mappings":";;;AAAA,6BAAwB;AAEX,QAAA,iBAAiB,GAAG,OAAC,CAAC,MAAM,CAAC;IACxC,QAAQ,EAAE,OAAC,CAAC,MAAM,EAAE,CAAC,QAAQ,EAAE;IAC/B,QAAQ,EAAE,OAAC,CAAC,MAAM,EAAE,CAAC,QAAQ,EAAE,CAAC,QAAQ,EAAE;CAC3C,CAAC,CAAC"}
