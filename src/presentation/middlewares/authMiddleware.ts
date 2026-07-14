@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import { verifyAccessToken } from "../../shared/utils/jwt";
-import { fail } from "../../shared/utils/response";
+import { verifyAccessToken } from "@/shared/utils/jwt";
+import { fail } from "@/shared/utils/response";
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   const header = req.headers.authorization;

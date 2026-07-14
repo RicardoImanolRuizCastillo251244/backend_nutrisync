@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import type { Role } from "../../shared/constants/roles";
-import { fail } from "../../shared/utils/response";
+import type { Role } from "@/shared/constants/roles";
+import { fail } from "@/shared/utils/response";
 
 export const requireRole = (...roles: Role[]) =>
   (req: Request, res: Response, next: NextFunction) => {

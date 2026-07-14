@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import type { ZodSchema } from "zod";
-import { fail } from "../../shared/utils/response";
+import { fail } from "@/shared/utils/response";
 
 export const validateBody = <T>(schema: ZodSchema<T>) =>
   (req: Request, res: Response, next: NextFunction) => {

@@ -1,13 +1,13 @@
 import { Router } from "express";
-import authRoutes from "./authRoutes";
-import patientRoutes from "./patientRoutes";
-import dietPlanRoutes from "./dietPlanRoutes";
-import voiceRoutes from "./voiceRoutes";
-import clinicalRecordRoutes from "./clinicalRecordRoutes";
-import adherenceRoutes from "./adherenceRoutes";
-import medicationRoutes from "./medicationRoutes";
-import progressRoutes from "./progressRoutes";
-import dashboardRoutes from "./dashboardRoutes";
+import authRoutes from "@/modules/auth/infrastructure/controllers/authRoutes";
+import patientRoutes from "@/modules/patients/infrastructure/controllers/patientRoutes";
+import dietPlanRoutes from "@/modules/diet-plans/infrastructure/controllers/dietPlanRoutes";
+import voiceRoutes from "@/modules/voice-notes/infrastructure/controllers/voiceRoutes";
+import clinicalRecordRoutes from "@/modules/clinical-records/infrastructure/controllers/clinicalRecordRoutes";
+import adherenceRoutes from "@/modules/adherence/infrastructure/controllers/adherenceRoutes";
+import medicationRoutes from "@/modules/medications/infrastructure/controllers/medicationRoutes";
+import progressRoutes from "@/modules/progress/infrastructure/controllers/progressRoutes";
+import dashboardRoutes from "@/modules/dashboard/infrastructure/controllers/dashboardRoutes";
 
 const router = Router();
 

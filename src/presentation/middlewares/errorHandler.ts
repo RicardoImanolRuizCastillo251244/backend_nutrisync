@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { DuplicateEmailError } from "../../shared/errors/DuplicateEmailError";
+import { DuplicateEmailError } from "@/shared/errors/DuplicateEmailError";
 
 export const errorHandler = (
   err: Error,

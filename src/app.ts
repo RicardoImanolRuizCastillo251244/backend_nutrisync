@@ -4,10 +4,10 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
-import { env } from "./shared/config/env";
-import { swaggerSpec } from "./shared/config/swagger";
-import routes from "./presentation/routes";
-import { errorHandler } from "./presentation/middlewares/errorHandler";
+import { env } from "@/shared/config/env";
+import { swaggerSpec } from "@/shared/config/swagger";
+import routes from "@/presentation/routes";
+import { errorHandler } from "@/presentation/middlewares/errorHandler";
 
 const app = express();
 

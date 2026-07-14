@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { fail } from "../../shared/utils/response";
+import { fail } from "@/shared/utils/response";
 
 export const requirePatientOwnership = (req: Request, res: Response, next: NextFunction) => {
   const user = req.user;

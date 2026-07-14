@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
-import app from "./app";
-import { env } from "./shared/config/env";
+import app from "@/app";
+import { env } from "@/shared/config/env";
 
 // Auto-sync database schema
 if (env.NODE_ENV === "production") {

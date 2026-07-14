@@ -1,4 +1,4 @@
-import type { Role } from "../constants/roles";
+import type { Role } from "@/shared/constants/roles";
 
 declare global {
   namespace Express {
