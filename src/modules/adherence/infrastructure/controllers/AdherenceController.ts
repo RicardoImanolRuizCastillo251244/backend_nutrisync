@@ -4,25 +4,47 @@ import { LogHydrationUseCase } from "@/modules/adherence/application/use-cases/L
 import { LogMoodUseCase } from "@/modules/adherence/application/use-cases/LogMoodUseCase";
 import { GetAdherenceSummaryUseCase } from "@/modules/adherence/application/use-cases/GetAdherenceSummaryUseCase";
 import { PrismaAdherenceRepository } from "@/modules/adherence/infrastructure/repositories/PrismaAdherenceRepository";
+import { PrismaPatientRepository } from "@/modules/patients/infrastructure/repositories/PrismaPatientRepository";
 import { ok, fail } from "@/shared/utils/response";
 
 const repository = new PrismaAdherenceRepository();
+const patientRepo = new PrismaPatientRepository();
 const logMealUseCase = new LogMealUseCase(repository);
 const logHydrationUseCase = new LogHydrationUseCase(repository);
 const logMoodUseCase = new LogMoodUseCase(repository);
 const getSummaryUseCase = new GetAdherenceSummaryUseCase(repository);
 
-// Helper: resolve patientUserId from params, query, or current user
-function getPatientId(req: Request): string {
-  if (req.params.patientUserId) return String(req.params.patientUserId);
-  if (req.query.patientId) return String(req.query.patientId as string);
+/**
+ * Resuelve el patientUserId real (FK de la tabla User) a partir de:
+ * 1. req.user.userId si es un paciente autenticado (propia adherencia)
+ * 2. req.query.patientId → busca el Patient y devuelve su userId
+ * 3. req.params.patientUserId → busca como Patient o lo usa directo
+ */
+async function getPatientUserId(req: Request): Promise<string> {
+  // Si viene patientId en query (nutriólogo consultando), resolver a userId
+  if (req.query.patientId) {
+    const patientId = String(req.query.patientId as string);
+    const patient = await patientRepo.findById(patientId);
+    if (patient) return patient.userId;
+  }
+
+  // Si viene en params como patientUserId, intentar resolver
+  if (req.params.patientUserId) {
+    const param = String(req.params.patientUserId);
+    const patient = await patientRepo.findById(param);
+    if (patient) return patient.userId;
+    return param; // Asumir que ya es un userId directo
+  }
+
+  // Fallback: el userId del token (paciente autenticado)
   return req.user!.userId;
 }
 
 export class AdherenceController {
   static async logMeal(req: Request, res: Response) {
     try {
-      const log = await logMealUseCase.execute({ patientUserId: getPatientId(req), ...req.body });
+      const patientUserId = await getPatientUserId(req);
+      const log = await logMealUseCase.execute({ patientUserId, ...req.body });
       return ok(res, log, 201);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -31,7 +53,8 @@ export class AdherenceController {
 
   static async logHydration(req: Request, res: Response) {
     try {
-      const log = await logHydrationUseCase.execute({ patientUserId: getPatientId(req), ...req.body });
+      const patientUserId = await getPatientUserId(req);
+      const log = await logHydrationUseCase.execute({ patientUserId, ...req.body });
       return ok(res, log, 201);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -40,7 +63,8 @@ export class AdherenceController {
 
   static async logMood(req: Request, res: Response) {
     try {
-      const log = await logMoodUseCase.execute({ patientUserId: getPatientId(req), ...req.body });
+      const patientUserId = await getPatientUserId(req);
+      const log = await logMoodUseCase.execute({ patientUserId, ...req.body });
       return ok(res, log, 201);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -49,11 +73,11 @@ export class AdherenceController {
 
   static async getSummary(req: Request, res: Response) {
     try {
-      const patientId = getPatientId(req);
+      const patientUserId = await getPatientUserId(req);
       const days = req.query.days ? Number(req.query.days) : 30;
       const from = new Date();
       from.setDate(from.getDate() - days);
-      const summary = await repository.getSummaryInRange(patientId, from);
+      const summary = await repository.getSummaryInRange(patientUserId, from);
       return ok(res, summary);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -62,9 +86,9 @@ export class AdherenceController {
 
   static async listMeals(req: Request, res: Response) {
     try {
-      const patientId = getPatientId(req);
+      const patientUserId = await getPatientUserId(req);
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
-      const logs = await repository.listMealLogs(patientId, date);
+      const logs = await repository.listMealLogs(patientUserId, date);
       return ok(res, logs);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -73,9 +97,9 @@ export class AdherenceController {
 
   static async listHydration(req: Request, res: Response) {
     try {
-      const patientId = getPatientId(req);
+      const patientUserId = await getPatientUserId(req);
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
-      const logs = await repository.listHydrationLogs(patientId, date);
+      const logs = await repository.listHydrationLogs(patientUserId, date);
       return ok(res, logs);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
@@ -95,9 +119,9 @@ export class AdherenceController {
 
   static async listMood(req: Request, res: Response) {
     try {
-      const patientId = getPatientId(req);
+      const patientUserId = await getPatientUserId(req);
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
-      const logs = await repository.listMoodLogs(patientId, date);
+      const logs = await repository.listMoodLogs(patientUserId, date);
       return ok(res, logs);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
