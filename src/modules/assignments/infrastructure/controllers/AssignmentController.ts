@@ -11,8 +11,8 @@ const unassignUseCase = new UnassignPlanUseCase(repository);
 export class AssignmentController {
   static async assign(req: Request, res: Response) {
     try {
-      const patientId = String(req.params.patientId ?? "");
-      const { planId } = req.body;
+      const planId = String(req.params.id ?? "");
+      const { patientId } = req.body;
       const assignment = await assignUseCase.execute({
         patientId,
         planId,
@@ -20,20 +20,28 @@ export class AssignmentController {
       });
       return ok(res, assignment, 201);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al asignar plan";
-      return fail(res, message, 500);
+      return fail(res, error instanceof Error ? error.message : "Error", 500);
     }
   }
 
   static async unassign(req: Request, res: Response) {
     try {
-      const patientId = String(req.params.patientId ?? "");
-      const { planId } = req.body;
+      const planId = String(req.params.id ?? "");
+      const { patientId } = req.body;
       await unassignUseCase.execute({ patientId, planId });
       return ok(res, { message: "Plan unassigned" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al desasignar plan";
-      return fail(res, message, 500);
+      return fail(res, error instanceof Error ? error.message : "Error", 500);
+    }
+  }
+
+  static async getActiveByPlan(req: Request, res: Response) {
+    try {
+      const planId = String(req.params.id ?? "");
+      const assignments = await repository.findActiveByPlan(planId);
+      return ok(res, assignments);
+    } catch (error) {
+      return fail(res, error instanceof Error ? error.message : "Error", 500);
     }
   }
 
@@ -43,8 +51,7 @@ export class AssignmentController {
       const assignments = await repository.listByPatient(patientId);
       return ok(res, assignments);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al listar asignaciones";
-      return fail(res, message, 500);
+      return fail(res, error instanceof Error ? error.message : "Error", 500);
     }
   }
 
@@ -53,8 +60,7 @@ export class AssignmentController {
       const assignments = await repository.listByNutritionist(req.user!.userId);
       return ok(res, assignments);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al listar asignaciones";
-      return fail(res, message, 500);
+      return fail(res, error instanceof Error ? error.message : "Error", 500);
     }
   }
 }

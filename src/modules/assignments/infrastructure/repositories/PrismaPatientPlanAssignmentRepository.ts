@@ -25,6 +25,13 @@ export class PrismaPatientPlanAssignmentRepository implements PatientPlanAssignm
     return assignment as PatientPlanAssignmentEntity | null;
   }
 
+  async findActiveByPlan(planId: string): Promise<PatientPlanAssignmentEntity[]> {
+    return prisma.patientPlanAssignment.findMany({
+      where: { planId, active: true },
+      orderBy: { assignedAt: "desc" },
+    }) as Promise<PatientPlanAssignmentEntity[]>;
+  }
+
   async listByPatient(patientId: string): Promise<PatientPlanAssignmentEntity[]> {
     const assignments = await prisma.patientPlanAssignment.findMany({
       where: { patientId },
