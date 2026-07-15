@@ -30,6 +30,7 @@ export interface CreateMealLogInput {
   patientUserId: string;
   planId?: string;
   mealName: string;
+  note?: string;
   date: Date;
   consumed?: boolean;
   consumedAt?: Date;

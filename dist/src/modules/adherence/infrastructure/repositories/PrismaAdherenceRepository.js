@@ -17,7 +17,7 @@ class PrismaAdherenceRepository {
         const where = { patientUserId };
         if (date)
             where.date = { gte: new Date(date.toISOString().slice(0, 10)), lt: new Date(new Date(date.toISOString().slice(0, 10)).getTime() + 86400000) };
-        return cast(prisma_1.prisma.mealLog.findMany({ where, orderBy: { createdAt: "desc" } }));
+        return cast(prisma_1.prisma.mealLog.findMany({ where, orderBy: { createdAt: "desc" }, include: { voiceNotes: true } }));
     }
     async listHydrationLogs(patientUserId, date) {
         const where = { patientUserId };

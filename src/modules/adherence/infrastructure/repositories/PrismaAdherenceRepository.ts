@@ -19,7 +19,7 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
   async listMealLogs(patientUserId: string, date?: Date): Promise<MealLogEntity[]> {
     const where: Record<string, unknown> = { patientUserId };
     if (date) where.date = { gte: new Date(date.toISOString().slice(0, 10)), lt: new Date(new Date(date.toISOString().slice(0, 10)).getTime() + 86400000) };
-    return cast<MealLogEntity[]>(prisma.mealLog.findMany({ where, orderBy: { createdAt: "desc" } }));
+    return cast<MealLogEntity[]>(prisma.mealLog.findMany({ where, orderBy: { createdAt: "desc" }, include: { voiceNotes: true } }));
   }
 
   async listHydrationLogs(patientUserId: string, date?: Date): Promise<HydrationLogEntity[]> {

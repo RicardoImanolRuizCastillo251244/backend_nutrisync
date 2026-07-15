@@ -209,6 +209,7 @@ model MealLog {
   patientUserId String
   planId       String?
   mealName     String
+  note         String?
   date         DateTime
   consumed     Boolean  @default(false)
   consumedAt   DateTime?
