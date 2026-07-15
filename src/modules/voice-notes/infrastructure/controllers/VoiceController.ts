@@ -29,18 +29,21 @@ export class VoiceController {
       const mealLogId = (req.body.mealLogId as string) || "";
 
       // Subir a Supabase
-      const { key, url } = await storageService.upload({
+      const { key } = await storageService.upload({
         key: `voice-notes/${uuid()}.m4a`,
         body: req.file.buffer,
         contentType: (req.file as any).mimetype || "audio/mp4",
       });
+
+      // Obtener URL firmada (7 días de validez) para acceso público
+      const signedUrl = await storageService.getSignedReadUrl(key, 604800);
 
       // Guardar referencia en BD
       const note = await voiceNoteRepository.create({
         patientUserId: req.user!.userId,
         mealLogId,
         storageKey: key,
-        publicUrl: url,
+        publicUrl: signedUrl,
       });
 
       return ok(res, note, 201);
