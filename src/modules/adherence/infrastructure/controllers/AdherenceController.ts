@@ -3,6 +3,7 @@ import { LogMealUseCase } from "@/modules/adherence/application/use-cases/LogMea
 import { LogHydrationUseCase } from "@/modules/adherence/application/use-cases/LogHydrationUseCase";
 import { LogMoodUseCase } from "@/modules/adherence/application/use-cases/LogMoodUseCase";
 import { GetAdherenceSummaryUseCase } from "@/modules/adherence/application/use-cases/GetAdherenceSummaryUseCase";
+import type { MealLogEntity } from "@/modules/adherence/domain/ports/repositories/AdherenceRepository";
 import { PrismaAdherenceRepository } from "@/modules/adherence/infrastructure/repositories/PrismaAdherenceRepository";
 import { PrismaPatientRepository } from "@/modules/patients/infrastructure/repositories/PrismaPatientRepository";
 import { ok, fail } from "@/shared/utils/response";
@@ -89,7 +90,21 @@ export class AdherenceController {
       const patientUserId = await getPatientUserId(req);
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
       const logs = await repository.listMealLogs(patientUserId, date);
-      return ok(res, logs);
+
+      // Deduplicar: 1 log por mealName, priorizando consumed=true y el más reciente
+      const deduped = new Map<string, MealLogEntity>();
+      for (const log of logs as any[]) {
+        const existing = deduped.get(log.mealName);
+        if (
+          !existing ||
+          (log.consumed && !existing.consumed) ||
+          (log.consumed === existing.consumed && new Date(log.createdAt) > new Date(existing.createdAt))
+        ) {
+          deduped.set(log.mealName, log);
+        }
+      }
+
+      return ok(res, Array.from(deduped.values()));
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
     }

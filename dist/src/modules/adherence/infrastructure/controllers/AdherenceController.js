@@ -88,7 +88,17 @@ class AdherenceController {
             const patientUserId = await getPatientUserId(req);
             const date = req.query.date ? new Date(req.query.date) : undefined;
             const logs = await repository.listMealLogs(patientUserId, date);
-            return (0, response_1.ok)(res, logs);
+            // Deduplicar: 1 log por mealName, priorizando consumed=true y el más reciente
+            const deduped = new Map();
+            for (const log of logs) {
+                const existing = deduped.get(log.mealName);
+                if (!existing ||
+                    (log.consumed && !existing.consumed) ||
+                    (log.consumed === existing.consumed && new Date(log.createdAt) > new Date(existing.createdAt))) {
+                    deduped.set(log.mealName, log);
+                }
+            }
+            return (0, response_1.ok)(res, Array.from(deduped.values()));
         }
         catch (error) {
             return (0, response_1.fail)(res, error instanceof Error ? error.message : "Error", 500);
