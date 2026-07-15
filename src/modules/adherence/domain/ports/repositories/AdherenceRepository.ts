@@ -38,7 +38,7 @@ export interface CreateMealLogInput {
 
 export interface CreateHydrationLogInput {
   patientUserId: string;
-  date: Date;
+  loggedAt: Date;
   amountMl: number;
 }
 

@@ -12,7 +12,7 @@ export class LogHydrationUseCase {
   async execute(input: Input) {
     const payload: CreateHydrationLogInput = {
       patientUserId: input.patientUserId,
-      date: new Date(input.date),
+      loggedAt: new Date(input.date),
       amountMl: input.amountMl,
     };
 

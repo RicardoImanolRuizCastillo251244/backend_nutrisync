@@ -8,7 +8,7 @@ class LogHydrationUseCase {
     async execute(input) {
         const payload = {
             patientUserId: input.patientUserId,
-            date: new Date(input.date),
+            loggedAt: new Date(input.date),
             amountMl: input.amountMl,
         };
         return this.repository.createHydrationLog(payload);
