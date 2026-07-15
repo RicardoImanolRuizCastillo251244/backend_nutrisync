@@ -13,6 +13,7 @@ class LogMealUseCase {
             consumed: input.consumed ?? false,
             ...(input.planId ? { planId: input.planId } : {}),
             ...(input.consumedAt ? { consumedAt: new Date(input.consumedAt) } : {}),
+            ...(input.note != null ? { note: input.note } : {}),
         };
         return this.repository.createMealLog(payload);
     }

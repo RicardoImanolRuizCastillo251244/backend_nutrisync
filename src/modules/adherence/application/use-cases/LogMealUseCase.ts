@@ -4,6 +4,7 @@ interface Input {
   patientUserId: string;
   planId?: string;
   mealName: string;
+  note?: string;
   date: string;
   consumed?: boolean;
   consumedAt?: string;
@@ -20,6 +21,7 @@ export class LogMealUseCase {
       consumed: input.consumed ?? false,
       ...(input.planId ? { planId: input.planId } : {}),
       ...(input.consumedAt ? { consumedAt: new Date(input.consumedAt) } : {}),
+      ...(input.note != null ? { note: input.note } : {}),
     };
 
     return this.repository.createMealLog(payload);

@@ -3,6 +3,7 @@ import { z } from "zod";
 export const logMealSchema = z.object({
   planId: z.string().optional(),
   mealName: z.string().min(1),
+  note: z.string().optional(),
   date: z.string(),
   consumed: z.boolean().optional(),
   consumedAt: z.string().optional(),
