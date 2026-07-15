@@ -5,7 +5,9 @@ const cast = <T>(v: unknown): T => v as unknown as T;
 
 export class PrismaAdherenceRepository implements AdherenceRepository {
   async createMealLog(input: CreateMealLogInput): Promise<MealLogEntity> {
-    return cast<MealLogEntity>(prisma.mealLog.create({ data: input }));
+    // Bypass del tipado estricto de Prisma para campos nuevos (note)
+    // que existen en BD pero no en el cliente generado en Render
+    return cast<MealLogEntity>((prisma.mealLog as any).create({ data: input }));
   }
 
   async createHydrationLog(input: CreateHydrationLogInput): Promise<HydrationLogEntity> {

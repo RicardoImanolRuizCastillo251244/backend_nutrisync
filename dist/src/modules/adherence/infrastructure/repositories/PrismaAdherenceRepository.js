@@ -5,6 +5,8 @@ const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
 const cast = (v) => v;
 class PrismaAdherenceRepository {
     async createMealLog(input) {
+        // Bypass del tipado estricto de Prisma para campos nuevos (note)
+        // que existen en BD pero no en el cliente generado en Render
         return cast(prisma_1.prisma.mealLog.create({ data: input }));
     }
     async createHydrationLog(input) {
