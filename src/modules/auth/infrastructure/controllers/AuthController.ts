@@ -22,6 +22,8 @@ export class AuthController {
 
   static async register(req: Request, res: Response) {
     try {
+      console.log('REGISTER REQ.BODY:', req.body);
+      console.log('REGISTER REQ.HEADERS:', req.headers['content-type']);
       const { email, password, name, role } = req.body;
       if (!email || !password || !name) return fail(res, "Email, password y name son requeridos", 400);
       const userRole = role === "nutritionist" ? "nutritionist" : "patient";

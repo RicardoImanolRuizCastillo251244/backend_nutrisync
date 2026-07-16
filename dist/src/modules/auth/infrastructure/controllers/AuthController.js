@@ -23,6 +23,8 @@ class AuthController {
     }
     static async register(req, res) {
         try {
+            console.log('REGISTER REQ.BODY:', req.body);
+            console.log('REGISTER REQ.HEADERS:', req.headers['content-type']);
             const { email, password, name, role } = req.body;
             if (!email || !password || !name)
                 return (0, response_1.fail)(res, "Email, password y name son requeridos", 400);
