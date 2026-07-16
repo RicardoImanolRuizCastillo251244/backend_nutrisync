@@ -58,12 +58,6 @@ export class PrismaPatientRepository implements PatientRepository {
       },
     });
 
-    // Actualizar el User con el patientProfileId
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { patientProfileId: patient.id },
-    });
-
     return cast<PatientEntity>(patient);
   }
 

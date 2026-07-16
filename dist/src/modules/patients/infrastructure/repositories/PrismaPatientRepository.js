@@ -51,11 +51,6 @@ class PrismaPatientRepository {
                 status: "pending",
             },
         });
-        // Actualizar el User con el patientProfileId
-        await prisma_1.prisma.user.update({
-            where: { id: user.id },
-            data: { patientProfileId: patient.id },
-        });
         return cast(patient);
     }
     async update(id, data) {
