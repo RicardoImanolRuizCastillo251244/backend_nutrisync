@@ -44,7 +44,7 @@ export interface CreateHydrationLogInput {
 
 export interface CreateMoodLogInput {
   patientUserId: string;
-  date: Date;
+  loggedAt: Date;
   mood: string;
   note?: string;
 }

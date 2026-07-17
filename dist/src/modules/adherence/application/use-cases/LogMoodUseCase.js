@@ -8,7 +8,7 @@ class LogMoodUseCase {
     async execute(input) {
         const payload = {
             patientUserId: input.patientUserId,
-            date: new Date(input.date),
+            loggedAt: new Date(input.date),
             mood: input.mood,
             ...(input.note ? { note: input.note } : {}),
         };

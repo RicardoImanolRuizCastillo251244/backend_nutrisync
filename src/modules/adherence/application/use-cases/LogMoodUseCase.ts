@@ -13,7 +13,7 @@ export class LogMoodUseCase {
   async execute(input: Input) {
     const payload: CreateMoodLogInput = {
       patientUserId: input.patientUserId,
-      date: new Date(input.date),
+      loggedAt: new Date(input.date),
       mood: input.mood,
       ...(input.note ? { note: input.note } : {}),
     };
