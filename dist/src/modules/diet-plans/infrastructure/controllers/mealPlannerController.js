@@ -44,17 +44,28 @@ class MealPlannerController {
             const plan = await mexinutriClient_1.mexiNutriClient.generateMealPlan(caloriesTarget, numberOfMeals);
             const meals = plan.meals.map((meal) => ({
                 name: meal.name,
-                items: meal.items.map((item) => ({
-                    name: item.name,
-                    calories: Math.round(item.calories),
-                    protein: Number(item.protein.toFixed(1)),
-                    carbs: Number(item.carbs.toFixed(1)),
-                    fat: Number(item.fat.toFixed(1)),
-                    portion: item.portion,
-                    imageUrl: item.imageUrl ?? null,
-                })),
+                items: [
+                    ...meal.ingredients.map((ing) => ({
+                        name: ing.name,
+                        calories: Math.round(meal.nutrition.calories * ing.quantity / 100),
+                        protein: Number((meal.nutrition.protein * ing.quantity / 100).toFixed(1)),
+                        carbs: Number((meal.nutrition.carbs * ing.quantity / 100).toFixed(1)),
+                        fat: Number((meal.nutrition.fat * ing.quantity / 100).toFixed(1)),
+                        portion: `${ing.quantity} ${ing.unit}`,
+                        imageUrl: meal.imageUrl ?? null,
+                    })),
+                    {
+                        name: `*Total ${meal.name}`,
+                        calories: Math.round(meal.nutrition.calories),
+                        protein: Number(meal.nutrition.protein.toFixed(1)),
+                        carbs: Number(meal.nutrition.carbs.toFixed(1)),
+                        fat: Number(meal.nutrition.fat.toFixed(1)),
+                        portion: 'total',
+                        imageUrl: meal.imageUrl ?? null,
+                    },
+                ],
             }));
-            return (0, response_1.ok)(res, { meals, totalCalories: plan.totalCalories });
+            return (0, response_1.ok)(res, { meals, totalCalories: plan.total.calories });
         }
         catch (e) {
             return (0, response_1.fail)(res, e instanceof Error ? e.message : "Error al generar plan sugerido", 500);

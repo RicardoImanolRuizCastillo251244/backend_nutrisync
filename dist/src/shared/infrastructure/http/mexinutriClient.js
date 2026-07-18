@@ -49,6 +49,9 @@ exports.mexiNutriClient = {
             targetCalories,
             numberOfMeals,
         });
+        if (!data.data?.meals) {
+            throw new Error("MexiNutri: respuesta sin meals");
+        }
         return data.data;
     },
 };

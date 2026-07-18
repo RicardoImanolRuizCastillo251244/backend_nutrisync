@@ -92,17 +92,25 @@ export interface MexiNutriCalculateResponse {
 export interface MexiNutriMealPlanResponse {
   meals: Array<{
     name: string;
-    items: Array<{
-      name: string;
-      portion: string;
+    imageUrl?: string;
+    nutrition: {
       calories: number;
       protein: number;
       carbs: number;
       fat: number;
-      imageUrl?: string;
+    };
+    ingredients: Array<{
+      name: string;
+      quantity: number;
+      unit: string;
     }>;
   }>;
-  totalCalories: number;
+  total: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
 }
 
 export const mexiNutriClient = {
@@ -131,6 +139,9 @@ export const mexiNutriClient = {
       targetCalories,
       numberOfMeals,
     });
+    if (!data.data?.meals) {
+      throw new Error("MexiNutri: respuesta sin meals");
+    }
     return data.data;
   },
 };
