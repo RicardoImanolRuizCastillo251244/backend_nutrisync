@@ -4,11 +4,11 @@ exports.mexiNutriClient = void 0;
 const env_1 = require("../../../shared/config/env");
 const BASE_URL = env_1.env.MEXINUTRI_BASE_URL;
 async function get(path, params) {
-    const url = new URL(path, BASE_URL);
-    if (params) {
-        Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    }
-    const res = await fetch(url.toString(), {
+    const searchParams = params
+        ? "?" + Object.entries(params).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&")
+        : "";
+    const url = `${BASE_URL}${path}${searchParams}`;
+    const res = await fetch(url, {
         headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) {

@@ -3,11 +3,11 @@ import { env } from "@/shared/config/env";
 const BASE_URL = env.MEXINUTRI_BASE_URL;
 
 async function get<T>(path: string, params?: Record<string, string>): Promise<T> {
-  const url = new URL(path, BASE_URL);
-  if (params) {
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  }
-  const res = await fetch(url.toString(), {
+  const searchParams = params
+    ? "?" + Object.entries(params).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&")
+    : "";
+  const url = `${BASE_URL}${path}${searchParams}`;
+  const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
   });
   if (!res.ok) {
