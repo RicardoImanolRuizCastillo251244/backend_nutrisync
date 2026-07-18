@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardController = void 0;
-const PrismaPatientRepository_1 = require("../../../../modules/patients/infrastructure/repositories/PrismaPatientRepository");
-const PrismaAdherenceRepository_1 = require("../../../../modules/adherence/infrastructure/repositories/PrismaAdherenceRepository");
-const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
-const response_1 = require("../../../../shared/utils/response");
+const PrismaPatientRepository_1 = require("@/modules/patients/infrastructure/repositories/PrismaPatientRepository");
+const PrismaAdherenceRepository_1 = require("@/modules/adherence/infrastructure/repositories/PrismaAdherenceRepository");
+const prisma_1 = require("@/shared/infrastructure/database/prisma");
+const response_1 = require("@/shared/utils/response");
 const patientRepo = new PrismaPatientRepository_1.PrismaPatientRepository();
 const adherenceRepo = new PrismaAdherenceRepository_1.PrismaAdherenceRepository();
 class DashboardController {

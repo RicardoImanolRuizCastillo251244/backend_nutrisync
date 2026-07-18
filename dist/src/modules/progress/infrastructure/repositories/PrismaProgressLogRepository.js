@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaProgressLogRepository = void 0;
-const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
+const prisma_1 = require("@/shared/infrastructure/database/prisma");
 class PrismaProgressLogRepository {
     async create(input) {
         const bmi = input.heightCm && input.heightCm > 0

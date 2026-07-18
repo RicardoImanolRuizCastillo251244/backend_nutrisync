@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaVoiceNoteRepository = void 0;
-const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
+const prisma_1 = require("@/shared/infrastructure/database/prisma");
 class PrismaVoiceNoteRepository {
     async create(data) {
         const note = await prisma_1.prisma.voiceNote.create({ data });

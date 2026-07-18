@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const MedicationController_1 = require("../../../../modules/medications/infrastructure/controllers/MedicationController");
-const authMiddleware_1 = require("../../../../presentation/middlewares/authMiddleware");
-const requireRole_1 = require("../../../../presentation/middlewares/requireRole");
-const validate_1 = require("../../../../presentation/middlewares/validate");
-const MedicationDto_1 = require("../../../../modules/medications/infrastructure/dtos/MedicationDto");
+const MedicationController_1 = require("@/modules/medications/infrastructure/controllers/MedicationController");
+const authMiddleware_1 = require("@/presentation/middlewares/authMiddleware");
+const requireRole_1 = require("@/presentation/middlewares/requireRole");
+const validate_1 = require("@/presentation/middlewares/validate");
+const MedicationDto_1 = require("@/modules/medications/infrastructure/dtos/MedicationDto");
 const router = (0, express_1.Router)();
 router.use(authMiddleware_1.requireAuth, (0, requireRole_1.requireRole)("patient"));
 router.post("/", (0, validate_1.validateBody)(MedicationDto_1.createMedicationSchema), MedicationController_1.MedicationController.create);

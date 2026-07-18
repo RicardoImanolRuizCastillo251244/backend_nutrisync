@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { DietPlanController } from "@/modules/diet-plans/infrastructure/controllers/DietPlanController";
 import { AssignmentController } from "@/modules/assignments/infrastructure/controllers/AssignmentController";
+import { MealPlannerController } from "@/modules/diet-plans/infrastructure/controllers/mealPlannerController";
 import { requireAuth } from "@/presentation/middlewares/authMiddleware";
 import { requireRole } from "@/presentation/middlewares/requireRole";
 
@@ -8,6 +9,11 @@ const router = Router();
 
 // Ruta para pacientes: ver su plan activo
 router.get("/my-plan", requireAuth, DietPlanController.getMyActivePlan);
+
+// Meal planner — sin autenticación (usan Edamam → MexiNutri)
+router.get("/foods/search", MealPlannerController.searchFood);
+router.post("/generate-suggested", MealPlannerController.generateSuggested);
+router.post("/calculate-item", MealPlannerController.calculateItem);
 
 // Resto de rutas solo para nutriólogos
 router.use(requireAuth, requireRole("nutritionist"));

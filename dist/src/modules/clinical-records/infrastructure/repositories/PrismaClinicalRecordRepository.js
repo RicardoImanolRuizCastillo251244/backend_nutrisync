@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaClinicalRecordRepository = void 0;
-const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
+const prisma_1 = require("@/shared/infrastructure/database/prisma");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cast = (v) => v;
 class PrismaClinicalRecordRepository {

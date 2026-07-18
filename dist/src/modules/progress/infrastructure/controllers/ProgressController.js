@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProgressController = void 0;
-const LogProgressUseCase_1 = require("../../../../modules/progress/application/use-cases/LogProgressUseCase");
-const PrismaProgressLogRepository_1 = require("../../../../modules/progress/infrastructure/repositories/PrismaProgressLogRepository");
-const response_1 = require("../../../../shared/utils/response");
+const LogProgressUseCase_1 = require("@/modules/progress/application/use-cases/LogProgressUseCase");
+const PrismaProgressLogRepository_1 = require("@/modules/progress/infrastructure/repositories/PrismaProgressLogRepository");
+const response_1 = require("@/shared/utils/response");
 const repository = new PrismaProgressLogRepository_1.PrismaProgressLogRepository();
 const logProgressUseCase = new LogProgressUseCase_1.LogProgressUseCase(repository);
 class ProgressController {

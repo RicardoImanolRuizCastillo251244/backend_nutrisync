@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClinicalRecordController = void 0;
-const CreateClinicalRecordUseCase_1 = require("../../../../modules/clinical-records/application/use-cases/CreateClinicalRecordUseCase");
-const UpdateClinicalRecordUseCase_1 = require("../../../../modules/clinical-records/application/use-cases/UpdateClinicalRecordUseCase");
-const CalculateClinicalMetrics_1 = require("../../../../modules/clinical-records/domain/services/CalculateClinicalMetrics");
-const PrismaClinicalRecordRepository_1 = require("../../../../modules/clinical-records/infrastructure/repositories/PrismaClinicalRecordRepository");
-const response_1 = require("../../../../shared/utils/response");
+const CreateClinicalRecordUseCase_1 = require("@/modules/clinical-records/application/use-cases/CreateClinicalRecordUseCase");
+const UpdateClinicalRecordUseCase_1 = require("@/modules/clinical-records/application/use-cases/UpdateClinicalRecordUseCase");
+const CalculateClinicalMetrics_1 = require("@/modules/clinical-records/domain/services/CalculateClinicalMetrics");
+const PrismaClinicalRecordRepository_1 = require("@/modules/clinical-records/infrastructure/repositories/PrismaClinicalRecordRepository");
+const response_1 = require("@/shared/utils/response");
 const repository = new PrismaClinicalRecordRepository_1.PrismaClinicalRecordRepository();
 const createUseCase = new CreateClinicalRecordUseCase_1.CreateClinicalRecordUseCase(repository);
 const updateUseCase = new UpdateClinicalRecordUseCase_1.UpdateClinicalRecordUseCase(repository);

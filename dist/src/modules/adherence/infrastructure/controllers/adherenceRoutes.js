@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const AdherenceController_1 = require("../../../../modules/adherence/infrastructure/controllers/AdherenceController");
-const authMiddleware_1 = require("../../../../presentation/middlewares/authMiddleware");
-const validate_1 = require("../../../../presentation/middlewares/validate");
-const AdherenceDto_1 = require("../../../../modules/adherence/infrastructure/dtos/AdherenceDto");
+const AdherenceController_1 = require("@/modules/adherence/infrastructure/controllers/AdherenceController");
+const authMiddleware_1 = require("@/presentation/middlewares/authMiddleware");
+const validate_1 = require("@/presentation/middlewares/validate");
+const AdherenceDto_1 = require("@/modules/adherence/infrastructure/dtos/AdherenceDto");
 const router = (0, express_1.Router)();
 router.use(authMiddleware_1.requireAuth);
 // POST: patient logs their own data

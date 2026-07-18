@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaAdherenceRepository = void 0;
-const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
+const prisma_1 = require("@/shared/infrastructure/database/prisma");
 const cast = (v) => v;
 class PrismaAdherenceRepository {
     async createMealLog(input) {

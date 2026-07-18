@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateBody = void 0;
-const response_1 = require("../../shared/utils/response");
+const response_1 = require("@/shared/utils/response");
 const validateBody = (schema) => (req, res, next) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {

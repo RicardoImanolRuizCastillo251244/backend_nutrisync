@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MedicationController = void 0;
-const CreateMedicationUseCase_1 = require("../../../../modules/medications/application/use-cases/CreateMedicationUseCase");
-const UpdateMedicationUseCase_1 = require("../../../../modules/medications/application/use-cases/UpdateMedicationUseCase");
-const LogMedicationTakeUseCase_1 = require("../../../../modules/medications/application/use-cases/LogMedicationTakeUseCase");
-const PrismaMedicationRepository_1 = require("../../../../modules/medications/infrastructure/repositories/PrismaMedicationRepository");
-const response_1 = require("../../../../shared/utils/response");
+const CreateMedicationUseCase_1 = require("@/modules/medications/application/use-cases/CreateMedicationUseCase");
+const UpdateMedicationUseCase_1 = require("@/modules/medications/application/use-cases/UpdateMedicationUseCase");
+const LogMedicationTakeUseCase_1 = require("@/modules/medications/application/use-cases/LogMedicationTakeUseCase");
+const PrismaMedicationRepository_1 = require("@/modules/medications/infrastructure/repositories/PrismaMedicationRepository");
+const response_1 = require("@/shared/utils/response");
 const repository = new PrismaMedicationRepository_1.PrismaMedicationRepository();
 const createUseCase = new CreateMedicationUseCase_1.CreateMedicationUseCase(repository);
 const updateUseCase = new UpdateMedicationUseCase_1.UpdateMedicationUseCase(repository);

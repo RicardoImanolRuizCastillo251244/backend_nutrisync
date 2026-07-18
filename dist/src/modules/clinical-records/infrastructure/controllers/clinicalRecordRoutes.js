@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const ClinicalRecordController_1 = require("../../../../modules/clinical-records/infrastructure/controllers/ClinicalRecordController");
-const authMiddleware_1 = require("../../../../presentation/middlewares/authMiddleware");
-const requireRole_1 = require("../../../../presentation/middlewares/requireRole");
-const validate_1 = require("../../../../presentation/middlewares/validate");
-const ClinicalRecordDto_1 = require("../../../../modules/clinical-records/infrastructure/dtos/ClinicalRecordDto");
+const ClinicalRecordController_1 = require("@/modules/clinical-records/infrastructure/controllers/ClinicalRecordController");
+const authMiddleware_1 = require("@/presentation/middlewares/authMiddleware");
+const requireRole_1 = require("@/presentation/middlewares/requireRole");
+const validate_1 = require("@/presentation/middlewares/validate");
+const ClinicalRecordDto_1 = require("@/modules/clinical-records/infrastructure/dtos/ClinicalRecordDto");
 const router = (0, express_1.Router)();
 router.post("/metrics", authMiddleware_1.requireAuth, ClinicalRecordController_1.ClinicalRecordController.upsertMetrics);
 router.get("/metrics", authMiddleware_1.requireAuth, ClinicalRecordController_1.ClinicalRecordController.getMetrics);

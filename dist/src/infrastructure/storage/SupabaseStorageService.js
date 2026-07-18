@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SupabaseStorageService = void 0;
 const supabase_js_1 = require("@supabase/supabase-js");
-const env_1 = require("../../shared/config/env");
+const env_1 = require("@/shared/config/env");
 class SupabaseStorageService {
     constructor() {
         this.client = (0, supabase_js_1.createClient)(env_1.env.SUPABASE_URL, env_1.env.SUPABASE_SERVICE_ROLE_KEY, {

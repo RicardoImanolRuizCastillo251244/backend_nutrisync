@@ -17,6 +17,7 @@ const envSchema = z.object({
   EDAMAM_FOOD_APP_KEY: z.string().min(1),
   EDAMAM_BASE_URL: z.string().url().default("https://api.edamam.com"),
   EDAMAM_MEAL_PLANNER_ACCOUNT_USER: z.string().default("TheJimmynt"),
+  MEXINUTRI_BASE_URL: z.string().url().default("https://mexinutri-backend.onrender.com/api"),
   SUPABASE_URL: z.string().url().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   SUPABASE_STORAGE_BUCKET: z.string().min(1),
