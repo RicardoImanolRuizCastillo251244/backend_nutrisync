@@ -54,29 +54,28 @@ export class MealPlannerController {
 
       const plan = await mexiNutriClient.generateMealPlan(caloriesTarget, numberOfMeals);
 
-      const meals = plan.meals.map((meal) => ({
-        name: meal.name,
-        items: [
-          ...meal.ingredients.map((ing) => ({
-            name: ing.name,
-            calories: Math.round(meal.nutrition.calories * ing.quantity / 100),
-            protein: Number((meal.nutrition.protein * ing.quantity / 100).toFixed(1)),
-            carbs: Number((meal.nutrition.carbs * ing.quantity / 100).toFixed(1)),
-            fat: Number((meal.nutrition.fat * ing.quantity / 100).toFixed(1)),
-            portion: `${ing.quantity} ${ing.unit}`,
-            imageUrl: meal.imageUrl ?? null,
-          })),
-          {
-            name: `*Total ${meal.name}`,
-            calories: Math.round(meal.nutrition.calories),
-            protein: Number(meal.nutrition.protein.toFixed(1)),
-            carbs: Number(meal.nutrition.carbs.toFixed(1)),
-            fat: Number(meal.nutrition.fat.toFixed(1)),
-            portion: 'total',
-            imageUrl: meal.imageUrl ?? null,
-          },
-        ],
-      }));
+      const meals = plan.meals.map((meal) => {
+        const totalCalories = Math.round(meal.nutrition.calories);
+        const ingredientsText = meal.ingredients
+          .map((i) => `${i.name} (${i.quantity}${i.unit === 'pieza' ? ' pzas' : 'g'})`)
+          .join(', ');
+        return {
+          name: meal.name,
+          totalCalories,
+          ingredients: ingredientsText,
+          items: [
+            {
+              name: meal.name,
+              calories: totalCalories,
+              protein: Number(meal.nutrition.protein.toFixed(1)),
+              carbs: Number(meal.nutrition.carbs.toFixed(1)),
+              fat: Number(meal.nutrition.fat.toFixed(1)),
+              portion: '1 platillo',
+              imageUrl: meal.imageUrl ?? null,
+            },
+          ],
+        };
+      });
 
       return ok(res, { meals, totalCalories: plan.total.calories });
     } catch (e) {
