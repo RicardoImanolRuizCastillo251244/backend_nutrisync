@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const PatientController_1 = require("@/modules/patients/infrastructure/controllers/PatientController");
-const authMiddleware_1 = require("@/presentation/middlewares/authMiddleware");
-const requireRole_1 = require("@/presentation/middlewares/requireRole");
+const PatientController_1 = require("../../../../modules/patients/infrastructure/controllers/PatientController");
+const authMiddleware_1 = require("../../../../presentation/middlewares/authMiddleware");
+const requireRole_1 = require("../../../../presentation/middlewares/requireRole");
 const router = (0, express_1.Router)();
 // Rutas que requieren autenticación de nutriólogo
 router.use(authMiddleware_1.requireAuth, (0, requireRole_1.requireRole)("nutritionist"));

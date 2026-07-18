@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AssignmentController = void 0;
-const AssignPlanToPatientUseCase_1 = require("@/modules/assignments/application/use-cases/AssignPlanToPatientUseCase");
-const UnassignPlanUseCase_1 = require("@/modules/assignments/application/use-cases/UnassignPlanUseCase");
-const PrismaPatientPlanAssignmentRepository_1 = require("@/modules/assignments/infrastructure/repositories/PrismaPatientPlanAssignmentRepository");
-const response_1 = require("@/shared/utils/response");
+const AssignPlanToPatientUseCase_1 = require("../../../../modules/assignments/application/use-cases/AssignPlanToPatientUseCase");
+const UnassignPlanUseCase_1 = require("../../../../modules/assignments/application/use-cases/UnassignPlanUseCase");
+const PrismaPatientPlanAssignmentRepository_1 = require("../../../../modules/assignments/infrastructure/repositories/PrismaPatientPlanAssignmentRepository");
+const response_1 = require("../../../../shared/utils/response");
 const repository = new PrismaPatientPlanAssignmentRepository_1.PrismaPatientPlanAssignmentRepository();
 const assignUseCase = new AssignPlanToPatientUseCase_1.AssignPlanToPatientUseCase(repository);
 const unassignUseCase = new UnassignPlanUseCase_1.UnassignPlanUseCase(repository);

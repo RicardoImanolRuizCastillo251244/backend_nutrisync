@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MealPlannerController = void 0;
-const mexinutriClient_1 = require("@/shared/infrastructure/http/mexinutriClient");
-const response_1 = require("@/shared/utils/response");
+const mexinutriClient_1 = require("../../../../shared/infrastructure/http/mexinutriClient");
+const response_1 = require("../../../../shared/utils/response");
 const mapFoodItem = (item) => ({
     name: item.name,
     calories: Math.round(item.calories ?? 0),

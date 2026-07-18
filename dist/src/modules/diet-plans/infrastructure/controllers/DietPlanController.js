@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DietPlanController = void 0;
-const CreateDietPlanUseCase_1 = require("@/modules/diet-plans/application/use-cases/CreateDietPlanUseCase");
-const PrismaDietPlanRepository_1 = require("@/modules/diet-plans/infrastructure/repositories/PrismaDietPlanRepository");
-const PrismaPatientRepository_1 = require("@/modules/patients/infrastructure/repositories/PrismaPatientRepository");
-const PrismaPatientPlanAssignmentRepository_1 = require("@/modules/assignments/infrastructure/repositories/PrismaPatientPlanAssignmentRepository");
-const PrismaAdherenceRepository_1 = require("@/modules/adherence/infrastructure/repositories/PrismaAdherenceRepository");
-const response_1 = require("@/shared/utils/response");
+const CreateDietPlanUseCase_1 = require("../../../../modules/diet-plans/application/use-cases/CreateDietPlanUseCase");
+const PrismaDietPlanRepository_1 = require("../../../../modules/diet-plans/infrastructure/repositories/PrismaDietPlanRepository");
+const PrismaPatientRepository_1 = require("../../../../modules/patients/infrastructure/repositories/PrismaPatientRepository");
+const PrismaPatientPlanAssignmentRepository_1 = require("../../../../modules/assignments/infrastructure/repositories/PrismaPatientPlanAssignmentRepository");
+const PrismaAdherenceRepository_1 = require("../../../../modules/adherence/infrastructure/repositories/PrismaAdherenceRepository");
+const response_1 = require("../../../../shared/utils/response");
 const repository = new PrismaDietPlanRepository_1.PrismaDietPlanRepository();
 const createUseCase = new CreateDietPlanUseCase_1.CreateDietPlanUseCase(repository);
 const patientRepo = new PrismaPatientRepository_1.PrismaPatientRepository();

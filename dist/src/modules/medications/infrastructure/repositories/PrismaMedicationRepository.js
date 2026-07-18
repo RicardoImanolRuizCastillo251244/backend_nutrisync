@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaMedicationRepository = void 0;
-const prisma_1 = require("@/shared/infrastructure/database/prisma");
+const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
 class PrismaMedicationRepository {
     async create(input) {
         const med = await prisma_1.prisma.medication.create({

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requirePatientOwnership = void 0;
-const response_1 = require("@/shared/utils/response");
+const response_1 = require("../../shared/utils/response");
 const requirePatientOwnership = (req, res, next) => {
     const user = req.user;
     if (!user) {

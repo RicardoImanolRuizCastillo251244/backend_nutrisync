@@ -1,11 +1,32 @@
-import axios from "axios";
 import { env } from "@/shared/config/env";
 
-const client = axios.create({
-  baseURL: env.MEXINUTRI_BASE_URL,
-  timeout: 15000,
-  headers: { "Content-Type": "application/json" },
-});
+const BASE_URL = env.MEXINUTRI_BASE_URL;
+
+async function get<T>(path: string, params?: Record<string, string>): Promise<T> {
+  const url = new URL(path, BASE_URL);
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  }
+  const res = await fetch(url.toString(), {
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`MexiNutri API error: ${res.status} ${res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`MexiNutri API error: ${res.status} ${res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
 
 export interface MexiNutriFood {
   id: string;
@@ -86,27 +107,27 @@ export interface MexiNutriMealPlanResponse {
 
 export const mexiNutriClient = {
   search: async (query: string): Promise<MexiNutriSearchResult[]> => {
-    const { data } = await client.get<{ success: boolean; results?: MexiNutriSearchResult[] }>("/search", { params: { q: query } });
+    const data = await get<{ success: boolean; results?: MexiNutriSearchResult[] }>("/search", { q: query });
     return data.results ?? [];
   },
 
   searchIngredients: async (query: string): Promise<MexiNutriFood[]> => {
-    const { data } = await client.get<{ success: boolean; data?: MexiNutriFood[] }>("/ingredients", { params: { q: query } });
+    const data = await get<{ success: boolean; data?: MexiNutriFood[] }>("/ingredients", { q: query });
     return data.data ?? [];
   },
 
   searchDishes: async (query: string): Promise<MexiNutriDish[]> => {
-    const { data } = await client.get<{ success: boolean; data?: MexiNutriDish[] }>("/dishes", { params: { q: query } });
+    const data = await get<{ success: boolean; data?: MexiNutriDish[] }>("/dishes", { q: query });
     return data.data ?? [];
   },
 
   calculateNutrition: async (items: Array<{ ingredientId: string; quantity: number }>): Promise<MexiNutriCalculateResponse> => {
-    const { data } = await client.post<{ success: boolean; data: MexiNutriCalculateResponse }>("/nutrition/calculate", { items });
+    const data = await post<{ success: boolean; data: MexiNutriCalculateResponse }>("/nutrition/calculate", { items });
     return data.data;
   },
 
   generateMealPlan: async (targetCalories: number, numberOfMeals: number = 3): Promise<MexiNutriMealPlanResponse> => {
-    const { data } = await client.post<{ success: boolean; data: MexiNutriMealPlanResponse }>("/meal-plans/generate", {
+    const data = await post<{ success: boolean; data: MexiNutriMealPlanResponse }>("/meal-plans/generate", {
       targetCalories,
       numberOfMeals,
     });

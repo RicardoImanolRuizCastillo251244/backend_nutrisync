@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const DietPlanController_1 = require("@/modules/diet-plans/infrastructure/controllers/DietPlanController");
-const AssignmentController_1 = require("@/modules/assignments/infrastructure/controllers/AssignmentController");
-const mealPlannerController_1 = require("@/modules/diet-plans/infrastructure/controllers/mealPlannerController");
-const authMiddleware_1 = require("@/presentation/middlewares/authMiddleware");
-const requireRole_1 = require("@/presentation/middlewares/requireRole");
+const DietPlanController_1 = require("../../../../modules/diet-plans/infrastructure/controllers/DietPlanController");
+const AssignmentController_1 = require("../../../../modules/assignments/infrastructure/controllers/AssignmentController");
+const mealPlannerController_1 = require("../../../../modules/diet-plans/infrastructure/controllers/mealPlannerController");
+const authMiddleware_1 = require("../../../../presentation/middlewares/authMiddleware");
+const requireRole_1 = require("../../../../presentation/middlewares/requireRole");
 const router = (0, express_1.Router)();
 // Ruta para pacientes: ver su plan activo
 router.get("/my-plan", authMiddleware_1.requireAuth, DietPlanController_1.DietPlanController.getMyActivePlan);

@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VoiceController = void 0;
 const uuid_1 = require("uuid");
-const ListVoiceNotesUseCase_1 = require("@/modules/voice-notes/application/use-cases/ListVoiceNotesUseCase");
-const DeleteVoiceNoteUseCase_1 = require("@/modules/voice-notes/application/use-cases/DeleteVoiceNoteUseCase");
-const PrismaVoiceNoteRepository_1 = require("@/modules/voice-notes/infrastructure/repositories/PrismaVoiceNoteRepository");
-const SupabaseStorageService_1 = require("@/infrastructure/storage/SupabaseStorageService");
-const response_1 = require("@/shared/utils/response");
+const ListVoiceNotesUseCase_1 = require("../../../../modules/voice-notes/application/use-cases/ListVoiceNotesUseCase");
+const DeleteVoiceNoteUseCase_1 = require("../../../../modules/voice-notes/application/use-cases/DeleteVoiceNoteUseCase");
+const PrismaVoiceNoteRepository_1 = require("../../../../modules/voice-notes/infrastructure/repositories/PrismaVoiceNoteRepository");
+const SupabaseStorageService_1 = require("../../../../infrastructure/storage/SupabaseStorageService");
+const response_1 = require("../../../../shared/utils/response");
 const voiceNoteRepository = new PrismaVoiceNoteRepository_1.PrismaVoiceNoteRepository();
 const storageService = new SupabaseStorageService_1.SupabaseStorageService();
 const listUseCase = new ListVoiceNotesUseCase_1.ListVoiceNotesUseCase(voiceNoteRepository);

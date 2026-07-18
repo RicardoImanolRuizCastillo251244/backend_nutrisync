@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
-const LoginUseCase_1 = require("@/modules/auth/application/use-cases/LoginUseCase");
-const PrismaAuthRepository_1 = require("@/modules/auth/infrastructure/repositories/PrismaAuthRepository");
-const PrismaPatientRepository_1 = require("@/modules/patients/infrastructure/repositories/PrismaPatientRepository");
-const hash_1 = require("@/shared/infrastructure/security/hash");
-const response_1 = require("@/shared/utils/response");
+const LoginUseCase_1 = require("../../../../modules/auth/application/use-cases/LoginUseCase");
+const PrismaAuthRepository_1 = require("../../../../modules/auth/infrastructure/repositories/PrismaAuthRepository");
+const PrismaPatientRepository_1 = require("../../../../modules/patients/infrastructure/repositories/PrismaPatientRepository");
+const hash_1 = require("../../../../shared/infrastructure/security/hash");
+const response_1 = require("../../../../shared/utils/response");
 const authRepository = new PrismaAuthRepository_1.PrismaAuthRepository();
 const patientRepository = new PrismaPatientRepository_1.PrismaPatientRepository();
 const loginUseCase = new LoginUseCase_1.LoginUseCase(authRepository, authRepository);

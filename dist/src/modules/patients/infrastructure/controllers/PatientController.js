@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PatientController = void 0;
-const PrismaPatientRepository_1 = require("@/modules/patients/infrastructure/repositories/PrismaPatientRepository");
-const hash_1 = require("@/shared/infrastructure/security/hash");
-const response_1 = require("@/shared/utils/response");
+const PrismaPatientRepository_1 = require("../../../../modules/patients/infrastructure/repositories/PrismaPatientRepository");
+const hash_1 = require("../../../../shared/infrastructure/security/hash");
+const response_1 = require("../../../../shared/utils/response");
 const repository = new PrismaPatientRepository_1.PrismaPatientRepository();
 class PatientController {
     // GET / -> listar pacientes asignados al nutriólogo autenticado

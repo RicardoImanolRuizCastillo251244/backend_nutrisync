@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaAuthRepository = void 0;
-const prisma_1 = require("@/shared/infrastructure/database/prisma");
+const prisma_1 = require("../../../../shared/infrastructure/database/prisma");
 const cast = (v) => v;
 class PrismaAuthRepository {
     async findUserByEmail(email) {

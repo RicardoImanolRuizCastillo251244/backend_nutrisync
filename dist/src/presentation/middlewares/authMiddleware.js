@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireAuth = void 0;
-const jwt_1 = require("@/shared/utils/jwt");
-const response_1 = require("@/shared/utils/response");
+const jwt_1 = require("../../shared/utils/jwt");
+const response_1 = require("../../shared/utils/response");
 const requireAuth = (req, res, next) => {
     const header = req.headers.authorization;
     if (!header?.startsWith("Bearer ")) {
