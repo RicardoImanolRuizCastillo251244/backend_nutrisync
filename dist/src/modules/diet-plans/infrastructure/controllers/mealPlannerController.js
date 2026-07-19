@@ -30,6 +30,9 @@ class MealPlannerController {
                 sourceUrl: null,
                 healthLabels: r.tags ?? [],
                 dietLabels: [],
+                type: r.type ?? null,
+                ingredients: r.ingredients ?? null,
+                description: r.description ?? '',
             }));
             return (0, response_1.ok)(res, foods);
         }

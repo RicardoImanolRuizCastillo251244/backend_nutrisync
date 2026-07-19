@@ -39,6 +39,9 @@ export class MealPlannerController {
         sourceUrl: null,
         healthLabels: r.tags ?? [],
         dietLabels: [],
+        type: (r as any).type ?? null,
+        ingredients: (r as any).ingredients ?? null,
+        description: (r as any).description ?? '',
       }));
 
       return ok(res, foods);

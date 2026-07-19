@@ -16,14 +16,25 @@ class DashboardController {
             const now = new Date();
             let from;
             let to;
-            if (rangeDays > 0) {
+            if (rangeDays === -1) {
+                // "Desde siempre": usar la fecha del paciente más antiguo
+                const oldestPatient = await prisma_1.prisma.patient.findFirst({
+                    where: { nutritionistUserId, deletedAt: null },
+                    orderBy: { createdAt: "asc" },
+                    select: { createdAt: true },
+                });
+                from = oldestPatient?.createdAt ?? new Date("2020-01-01");
+                from.setHours(0, 0, 0, 0);
+                to = new Date();
+                to.setHours(23, 59, 59, 999);
+            }
+            else {
                 from = new Date();
                 from.setDate(from.getDate() - Math.max(0, rangeDays - 1));
                 from.setHours(0, 0, 0, 0);
                 to = new Date();
                 to.setHours(23, 59, 59, 999);
             }
-            // rangeDays <= 0 significa "desde siempre" — sin filtro de fecha
             // Pacientes totales
             const patients = await patientRepo.listByNutritionist(nutritionistUserId);
             const totalPatients = patients.length;
@@ -35,9 +46,7 @@ class DashboardController {
             const patientAdherenceData = [];
             for (const p of patients) {
                 try {
-                    const summary = from
-                        ? await adherenceRepo.getSummaryInRange(p.userId, from, to)
-                        : await adherenceRepo.getSummary(p.userId);
+                    const summary = await adherenceRepo.getSummaryInRange(p.userId, from, to);
                     patientAdherenceData.push({
                         patientId: p.id,
                         patientName: p.user?.name ?? 'Sin nombre',
