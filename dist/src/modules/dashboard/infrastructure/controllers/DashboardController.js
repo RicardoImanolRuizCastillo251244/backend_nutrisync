@@ -11,6 +11,19 @@ class DashboardController {
     static async getNutritionistDashboard(req, res) {
         try {
             const nutritionistUserId = req.user.userId;
+            const rangeDays = parseInt(req.query.range, 10) || 1;
+            // Calcular fecha "from" según el rango
+            const now = new Date();
+            let from;
+            let to;
+            if (rangeDays > 0) {
+                from = new Date();
+                from.setDate(from.getDate() - Math.max(0, rangeDays - 1));
+                from.setHours(0, 0, 0, 0);
+                to = new Date();
+                to.setHours(23, 59, 59, 999);
+            }
+            // rangeDays <= 0 significa "desde siempre" — sin filtro de fecha
             // Pacientes totales
             const patients = await patientRepo.listByNutritionist(nutritionistUserId);
             const totalPatients = patients.length;
@@ -18,27 +31,44 @@ class DashboardController {
             const activePlans = await prisma_1.prisma.dietPlan.count({
                 where: { nutritionistUserId, deletedAt: null },
             });
-            // Adherencia promedio
-            const summaries = await Promise.all(patients.slice(0, 20).map(async (p) => {
+            // Adherencia por paciente en el rango seleccionado
+            const patientAdherenceData = [];
+            for (const p of patients) {
                 try {
-                    const summary = await adherenceRepo.getSummary(p.userId);
-                    return { patientId: p.id, userId: p.userId, ...summary };
+                    const summary = from
+                        ? await adherenceRepo.getSummaryInRange(p.userId, from, to)
+                        : await adherenceRepo.getSummary(p.userId);
+                    patientAdherenceData.push({
+                        patientId: p.id,
+                        patientName: p.user?.name ?? 'Sin nombre',
+                        adherence: Math.round((summary.adherenceRate ?? 0) * 100),
+                        mealsCompleted: summary.mealsCompleted ?? 0,
+                        mealsLogged: summary.mealsLogged ?? 0,
+                    });
                 }
                 catch {
-                    return { patientId: p.id, userId: p.userId };
+                    patientAdherenceData.push({
+                        patientId: p.id,
+                        patientName: p.user?.name ?? 'Sin nombre',
+                        adherence: 0,
+                        mealsCompleted: 0,
+                        mealsLogged: 0,
+                    });
                 }
-            }));
-            const adherenceRates = summaries
-                .map((s) => s.adherenceRate ?? 0)
-                .filter((r) => r > 0);
-            const averageAdherence = adherenceRates.length > 0
-                ? Math.round(adherenceRates.reduce((a, b) => a + b, 0) / adherenceRates.length)
+            }
+            // Adherencia promedio (solo pacientes con datos)
+            const ratesWithData = patientAdherenceData
+                .filter((p) => p.mealsLogged > 0)
+                .map((p) => p.adherence);
+            const averageAdherence = ratesWithData.length > 0
+                ? Math.round(ratesWithData.reduce((a, b) => a + b, 0) / ratesWithData.length)
                 : 0;
             return (0, response_1.ok)(res, {
                 totalPatients,
                 activePlans,
                 averageAdherence,
-                summaries,
+                patientAdherence: patientAdherenceData,
+                range: rangeDays,
             });
         }
         catch (e) {
