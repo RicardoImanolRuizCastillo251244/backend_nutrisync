@@ -69,6 +69,7 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
     return {
       mealsLogged: meals.length,
       mealsCompleted,
+      expectedMeals,
       hydrationTotalMl,
       moodEntries: moods.length,
       adherenceRate: Math.round(adherenceRate * 100) / 100,

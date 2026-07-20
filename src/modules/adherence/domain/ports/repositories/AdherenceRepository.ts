@@ -52,6 +52,7 @@ export interface CreateMoodLogInput {
 export interface AdherenceSummary {
   mealsLogged: number;
   mealsCompleted: number;
+  expectedMeals: number;
   hydrationTotalMl: number;
   moodEntries: number;
   adherenceRate: number;
