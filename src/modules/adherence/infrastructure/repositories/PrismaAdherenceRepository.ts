@@ -58,8 +58,14 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
       prisma.moodLog.findMany({ where: moodsWhere }),
     ]);
     const mealsCompleted = meals.filter(m => m.consumed).length;
+
+    // Calcular días totales en el rango
+    const daysInRange = Math.max(1, Math.ceil((to.getTime() - from.getTime()) / 86_400_000));
+    // Se esperan 3 comidas por día en el rango
+    const expectedMeals = daysInRange * 3;
+    const adherenceRate = expectedMeals > 0 ? Math.min(1, mealsCompleted / expectedMeals) : 0;
+
     const hydrationTotalMl = hydrations.reduce((sum, h) => sum + h.amountMl, 0);
-    const adherenceRate = meals.length > 0 ? mealsCompleted / meals.length : 0;
     return {
       mealsLogged: meals.length,
       mealsCompleted,
