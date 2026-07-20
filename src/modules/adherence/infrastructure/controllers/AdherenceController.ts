@@ -75,8 +75,12 @@ export class AdherenceController {
   static async getMySummary(req: Request, res: Response) {
     try {
       const patientUserId = req.user!.userId;
-      const from = new Date();
-      from.setDate(from.getDate() - 7);
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0=dom, 1=lun, ..., 6=sab
+      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const from = new Date(now);
+      from.setDate(from.getDate() - mondayOffset);
+      from.setHours(0, 0, 0, 0);
       const summary = await repository.getSummaryInRange(patientUserId, from);
       return ok(res, summary);
     } catch (error) {
