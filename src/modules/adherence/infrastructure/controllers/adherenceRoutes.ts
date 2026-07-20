@@ -14,6 +14,7 @@ router.post("/hydration", validateBody(logHydrationSchema), AdherenceController.
 router.post("/mood", validateBody(logMoodSchema), AdherenceController.logMood);
 
 // GET: both patient (own data) and nutritionist (via ?patientId=)
+router.get("/my-summary", AdherenceController.getMySummary);
 router.get("/summary/:patientUserId", AdherenceController.getSummary);
 router.get("/summary", AdherenceController.getSummary);
 router.get("/meals", AdherenceController.listMeals);

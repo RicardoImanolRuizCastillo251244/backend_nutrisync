@@ -72,6 +72,18 @@ export class AdherenceController {
     }
   }
 
+  static async getMySummary(req: Request, res: Response) {
+    try {
+      const patientUserId = req.user!.userId;
+      const from = new Date();
+      from.setDate(from.getDate() - 7);
+      const summary = await repository.getSummaryInRange(patientUserId, from);
+      return ok(res, summary);
+    } catch (error) {
+      return fail(res, error instanceof Error ? error.message : "Error", 500);
+    }
+  }
+
   static async getSummary(req: Request, res: Response) {
     try {
       const patientUserId = await getPatientUserId(req);
