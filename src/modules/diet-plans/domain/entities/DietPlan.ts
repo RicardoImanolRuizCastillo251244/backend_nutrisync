@@ -11,6 +11,7 @@ export interface DietDayMealFoodItemEntity {
   imageUrl: string | null;
   healthLabels: string[];
   dietLabels: string[];
+  ingredients: unknown | null;
 }
 
 export interface DietDayMealEntity {

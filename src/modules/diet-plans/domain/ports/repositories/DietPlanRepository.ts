@@ -20,6 +20,7 @@ export interface CreateDietPlanInput {
         imageUrl?: string;
         healthLabels: string[];
         dietLabels: string[];
+        ingredients?: unknown;
       }>;
     }>;
   }>;

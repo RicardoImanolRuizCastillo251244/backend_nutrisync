@@ -187,6 +187,7 @@ model MealFoodItem {
   imageUrl         String?
   healthLabels     String[]
   dietLabels       String[]
+  ingredients      Json?
 
   meal             Meal      @relation(fields: [mealId], references: [id], onDelete: Cascade)
 }
