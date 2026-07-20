@@ -52,11 +52,27 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
     const hydrationsWhere = { patientUserId, loggedAt: { gte: from, lt: to } };
     const moodsWhere = { patientUserId, loggedAt: { gte: from, lt: to } };
 
-    const [meals, hydrations, moods] = await Promise.all([
+    const [rawMeals, hydrations, moods] = await Promise.all([
       prisma.mealLog.findMany({ where: mealsWhere }),
       prisma.hydrationLog.findMany({ where: hydrationsWhere }),
       prisma.moodLog.findMany({ where: moodsWhere }),
     ]);
+
+    // Deduplicar: 1 log por mealName por día, priorizando consumed=true y el más reciente
+    const deduped = new Map<string, (typeof rawMeals)[number]>();
+    for (const log of rawMeals as any[]) {
+      const day = (log.date as Date).toISOString().slice(0, 10);
+      const key = `${day}::${log.mealName}`;
+      const existing = deduped.get(key);
+      if (
+        !existing ||
+        (log.consumed && !existing.consumed) ||
+        (log.consumed === existing.consumed && new Date(log.createdAt) > new Date(existing.createdAt))
+      ) {
+        deduped.set(key, log);
+      }
+    }
+    const meals = Array.from(deduped.values());
     const mealsCompleted = meals.filter(m => m.consumed).length;
 
     // Calcular días totales en el rango
