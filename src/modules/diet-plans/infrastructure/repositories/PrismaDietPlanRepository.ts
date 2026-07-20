@@ -19,19 +19,25 @@ export class PrismaDietPlanRepository implements DietPlanRepository {
                 name: meal.name,
                 note: meal.note ?? null,
                 items: {
-                  create: meal.items.map(item => ({
-                    name: item.name,
-                    portion: item.portion ?? null,
-                    calories: item.calories ?? null,
-                    protein: item.protein ?? null,
-                    carbs: item.carbs ?? null,
-                    fat: item.fat ?? null,
-                    edamamRecipeUrl: item.edamamRecipeUrl ?? null,
-                    imageUrl: item.imageUrl ?? null,
-                    healthLabels: item.healthLabels,
-                    dietLabels: item.dietLabels,
-                    ingredients: item.ingredients ?? undefined,
-                  })),
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  create: meal.items.map(item => {
+                    const data: Record<string, unknown> = {
+                      name: item.name,
+                      portion: item.portion ?? null,
+                      calories: item.calories ?? null,
+                      protein: item.protein ?? null,
+                      carbs: item.carbs ?? null,
+                      fat: item.fat ?? null,
+                      edamamRecipeUrl: item.edamamRecipeUrl ?? null,
+                      imageUrl: item.imageUrl ?? null,
+                      healthLabels: item.healthLabels,
+                      dietLabels: item.dietLabels,
+                    };
+                    if (item.ingredients != null) {
+                      data.ingredients = item.ingredients;
+                    }
+                    return data;
+                  }) as any,
                 },
               })),
             },
@@ -79,19 +85,24 @@ export class PrismaDietPlanRepository implements DietPlanRepository {
                   name: meal.name,
                   note: meal.note ?? null,
                   items: {
-                    create: meal.items.map(item => ({
-                      name: item.name,
-                      portion: item.portion ?? null,
-                      calories: item.calories ?? null,
-                      protein: item.protein ?? null,
-                      carbs: item.carbs ?? null,
-                      fat: item.fat ?? null,
-                      edamamRecipeUrl: item.edamamRecipeUrl ?? null,
-                      imageUrl: item.imageUrl ?? null,
-                      healthLabels: item.healthLabels,
-                      dietLabels: item.dietLabels,
-                      ingredients: item.ingredients ?? undefined,
-                    })),
+                    create: meal.items.map(item => {
+                      const data: Record<string, unknown> = {
+                        name: item.name,
+                        portion: item.portion ?? null,
+                        calories: item.calories ?? null,
+                        protein: item.protein ?? null,
+                        carbs: item.carbs ?? null,
+                        fat: item.fat ?? null,
+                        edamamRecipeUrl: item.edamamRecipeUrl ?? null,
+                        imageUrl: item.imageUrl ?? null,
+                        healthLabels: item.healthLabels,
+                        dietLabels: item.dietLabels,
+                      };
+                      if (item.ingredients != null) {
+                        data.ingredients = item.ingredients;
+                      }
+                      return data;
+                    }) as any,
                   },
                 })),
               },
