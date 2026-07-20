@@ -72,7 +72,20 @@ export class PrismaAdherenceRepository implements AdherenceRepository {
         deduped.set(key, log);
       }
     }
-    const meals = Array.from(deduped.values());
+    const dedupedMeals = Array.from(deduped.values());
+
+    // Limitar a máximo 3 comidas por día (conservando las más recientes)
+    const mealsByDay = new Map<string, typeof dedupedMeals>();
+    for (const m of dedupedMeals) {
+      const day = ((m as any).date as Date).toISOString().slice(0, 10);
+      if (!mealsByDay.has(day)) mealsByDay.set(day, []);
+      mealsByDay.get(day)!.push(m);
+    }
+    const meals = Array.from(mealsByDay.values()).flatMap(dayMeals =>
+      dayMeals
+        .sort((a, b) => new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime())
+        .slice(0, 3),
+    );
     const mealsCompleted = meals.filter(m => m.consumed).length;
 
     // Calcular días totales en el rango
