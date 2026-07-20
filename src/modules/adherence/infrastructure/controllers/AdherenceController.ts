@@ -81,7 +81,10 @@ export class AdherenceController {
       const from = new Date(now);
       from.setDate(from.getDate() - mondayOffset);
       from.setHours(0, 0, 0, 0);
-      const summary = await repository.getSummaryInRange(patientUserId, from);
+      const to = new Date(from);
+      to.setDate(to.getDate() + 6);
+      to.setHours(23, 59, 59, 999);
+      const summary = await repository.getSummaryInRange(patientUserId, from, to);
       return ok(res, summary);
     } catch (error) {
       return fail(res, error instanceof Error ? error.message : "Error", 500);
