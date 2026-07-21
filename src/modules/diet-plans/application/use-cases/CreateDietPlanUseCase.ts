@@ -16,10 +16,12 @@ interface Input {
         protein?: number;
         carbs?: number;
         fat?: number;
+        type?: string;
         edamamRecipeUrl?: string;
         imageUrl?: string;
         healthLabels?: string[];
         dietLabels?: string[];
+        ingredients?: unknown;
       }>;
     }>;
   }>;
@@ -45,8 +47,10 @@ export class CreateDietPlanUseCase {
             ...(item.protein ? { protein: item.protein } : {}),
             ...(item.carbs ? { carbs: item.carbs } : {}),
             ...(item.fat ? { fat: item.fat } : {}),
+            ...(item.type ? { type: item.type } : {}),
             ...(item.edamamRecipeUrl ? { edamamRecipeUrl: item.edamamRecipeUrl } : {}),
             ...(item.imageUrl ? { imageUrl: item.imageUrl } : {}),
+            ...(item.ingredients != null ? { ingredients: item.ingredients } : {}),
             healthLabels: item.healthLabels ?? [],
             dietLabels: item.dietLabels ?? [],
           })),
