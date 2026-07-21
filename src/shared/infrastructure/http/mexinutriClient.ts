@@ -90,9 +90,12 @@ export interface MexiNutriCalculateResponse {
 }
 
 export interface MexiNutriMealPlanResponse {
+  targetCalories?: number;
   meals: Array<{
+    type?: string;
     name: string;
-    imageUrl?: string;
+    dishId?: number;
+    imageUrl?: string | null;
     nutrition: {
       calories: number;
       protein: number;
@@ -100,9 +103,14 @@ export interface MexiNutriMealPlanResponse {
       fat: number;
     };
     ingredients: Array<{
+      ingredientId?: number;
       name: string;
       quantity: number;
       unit: string;
+      calories?: number;
+      protein?: number;
+      carbs?: number;
+      fat?: number;
     }>;
   }>;
   total: {

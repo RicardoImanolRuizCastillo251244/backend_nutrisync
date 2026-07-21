@@ -57,30 +57,39 @@ export class MealPlannerController {
 
       const plan = await mexiNutriClient.generateMealPlan(caloriesTarget, numberOfMeals);
 
-      const meals = plan.meals.map((meal) => {
-        const totalCalories = Math.round(meal.nutrition.calories);
-        const ingredientsText = meal.ingredients
-          .map((i) => `${i.name} (${i.quantity}${i.unit === 'pieza' ? ' pzas' : 'g'})`)
-          .join(', ');
-        return {
-          name: meal.name,
-          totalCalories,
-          ingredients: ingredientsText,
-          items: [
-            {
-              name: meal.name,
-              calories: totalCalories,
-              protein: Number(meal.nutrition.protein.toFixed(1)),
-              carbs: Number(meal.nutrition.carbs.toFixed(1)),
-              fat: Number(meal.nutrition.fat.toFixed(1)),
-              portion: '1 platillo',
-              imageUrl: meal.imageUrl ?? null,
-            },
-          ],
-        };
-      });
+      const meals = plan.meals.map((meal) => ({
+        type: meal.type ?? 'dish',
+        name: meal.name,
+        dishId: meal.dishId ?? null,
+        imageUrl: meal.imageUrl ?? null,
+        ingredients: meal.ingredients.map((i) => ({
+          ingredientId: i.ingredientId ?? null,
+          name: i.name,
+          quantity: i.quantity,
+          unit: i.unit,
+          calories: i.calories ?? null,
+          protein: i.protein ?? null,
+          carbs: i.carbs ?? null,
+          fat: i.fat ?? null,
+        })),
+        nutrition: {
+          calories: Math.round(meal.nutrition.calories),
+          protein: Number(meal.nutrition.protein.toFixed(1)),
+          carbs: Number(meal.nutrition.carbs.toFixed(1)),
+          fat: Number(meal.nutrition.fat.toFixed(1)),
+        },
+      }));
 
-      return ok(res, { meals, totalCalories: plan.total.calories });
+      return ok(res, {
+        targetCalories: caloriesTarget,
+        meals,
+        total: {
+          calories: plan.total.calories,
+          protein: Number(plan.total.protein.toFixed(1)),
+          carbs: Number(plan.total.carbs.toFixed(1)),
+          fat: Number(plan.total.fat.toFixed(1)),
+        },
+      });
     } catch (e) {
       return fail(res, e instanceof Error ? e.message : "Error al generar plan sugerido", 500);
     }
