@@ -16,6 +16,7 @@ export interface CreateDietPlanInput {
         protein?: number;
         carbs?: number;
         fat?: number;
+        type?: string;
         edamamRecipeUrl?: string;
         imageUrl?: string;
         healthLabels: string[];

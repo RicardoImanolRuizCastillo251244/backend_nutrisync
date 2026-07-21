@@ -28,6 +28,7 @@ export class PrismaDietPlanRepository implements DietPlanRepository {
                       protein: item.protein ?? null,
                       carbs: item.carbs ?? null,
                       fat: item.fat ?? null,
+                      type: item.type ?? null,
                       edamamRecipeUrl: item.edamamRecipeUrl ?? null,
                       imageUrl: item.imageUrl ?? null,
                       healthLabels: item.healthLabels,
@@ -86,29 +87,30 @@ export class PrismaDietPlanRepository implements DietPlanRepository {
                   note: meal.note ?? null,
                   items: {
                     create: meal.items.map(item => {
-                      const data: Record<string, unknown> = {
-                        name: item.name,
-                        portion: item.portion ?? null,
-                        calories: item.calories ?? null,
-                        protein: item.protein ?? null,
-                        carbs: item.carbs ?? null,
-                        fat: item.fat ?? null,
-                        edamamRecipeUrl: item.edamamRecipeUrl ?? null,
-                        imageUrl: item.imageUrl ?? null,
-                        healthLabels: item.healthLabels,
-                        dietLabels: item.dietLabels,
-                      };
-                      if (item.ingredients != null) {
-                        data.ingredients = item.ingredients;
-                      }
-                      return data;
-                    }) as any,
-                  },
-                })),
-              },
+                    const data: Record<string, unknown> = {
+                      name: item.name,
+                      portion: item.portion ?? null,
+                      calories: item.calories ?? null,
+                      protein: item.protein ?? null,
+                      carbs: item.carbs ?? null,
+                      fat: item.fat ?? null,
+                      type: item.type ?? null,
+                      edamamRecipeUrl: item.edamamRecipeUrl ?? null,
+                      imageUrl: item.imageUrl ?? null,
+                      healthLabels: item.healthLabels,
+                      dietLabels: item.dietLabels,
+                    };
+                    if (item.ingredients != null) {
+                      data.ingredients = item.ingredients;
+                    }
+                    return data;
+                  }) as any,
+                },
+              })),
             },
-          });
-        }
+          },
+        });
+      }
       }
 
       // Retornar el plan actualizado completo

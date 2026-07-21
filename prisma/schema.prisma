@@ -183,6 +183,7 @@ model MealFoodItem {
   protein          Float?
   carbs            Float?
   fat              Float?
+  type             String?
   edamamRecipeUrl  String?
   imageUrl         String?
   healthLabels     String[]
